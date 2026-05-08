@@ -22,7 +22,7 @@ const AssetDetail = () => {
     const fetchAsset = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get(`http://localhost:5000/api/assets/${id}`, {
+        const res = await axios.get(`https://asset-backend-r4qe.onrender.com/api/assets/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setAsset(res.data);
@@ -61,7 +61,7 @@ const AssetDetail = () => {
       <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
         <div style={{ flex: '1 1 300px' }}>
           {asset.image ? (
-            <img src={`http://localhost:5000${asset.image}`} alt={asset.name} style={{ width: '100%', height: 'auto', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', objectFit: 'cover' }} />
+            <img src={`https://asset-backend-r4qe.onrender.com${asset.image}`} alt={asset.name} style={{ width: '100%', height: 'auto', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', objectFit: 'cover' }} />
           ) : (
             <div style={{ width: '100%', height: '250px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '4rem', color: 'rgba(148,163,184,0.3)' }}>
               {TYPE_ICON[asset.type] || '◈'}

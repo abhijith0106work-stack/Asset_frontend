@@ -42,8 +42,8 @@ const AssetsList = ({ role }) => {
     try {
       const token = localStorage.getItem('token');
       const url = role === 'User'
-        ? 'http://localhost:5000/api/assets/me'
-        : 'http://localhost:5000/api/assets';
+        ? 'https://asset-backend-r4qe.onrender.com/api/assets/me'
+        : 'https://asset-backend-r4qe.onrender.com/api/assets';
       const res = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } });
       setAssets(res.data);
     } catch (err) { console.error(err); }
@@ -52,7 +52,7 @@ const AssetsList = ({ role }) => {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/users', {
+      const res = await axios.get('https://asset-backend-r4qe.onrender.com/api/users', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUsers(res.data);
@@ -62,7 +62,7 @@ const AssetsList = ({ role }) => {
   const fetchCompanies = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/companies', {
+      const res = await axios.get('https://asset-backend-r4qe.onrender.com/api/companies', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCompanies(res.data);
@@ -110,9 +110,9 @@ const AssetsList = ({ role }) => {
       if (imageFile) payload.append('image', imageFile);
 
       if (editingAssetId) {
-        await axios.put(`http://localhost:5000/api/assets/${editingAssetId}`, payload, config);
+        await axios.put(`https://asset-backend-r4qe.onrender.com/api/assets/${editingAssetId}`, payload, config);
       } else {
-        await axios.post('http://localhost:5000/api/assets', payload, config);
+        await axios.post('https://asset-backend-r4qe.onrender.com/api/assets', payload, config);
       }
 
       closeModal();
@@ -142,7 +142,7 @@ const AssetsList = ({ role }) => {
       deviceLocation: asset.deviceLocation || '',
       company: asset.company?._id || asset.company || ''
     });
-    setImagePreview(asset.image ? `http://localhost:5000${asset.image}` : null);
+    setImagePreview(asset.image ? `https://asset-backend-r4qe.onrender.com${asset.image}` : null);
     setImageFile(null);
     setIsModalOpen(true);
   };
@@ -151,7 +151,7 @@ const AssetsList = ({ role }) => {
     if (!window.confirm('Are you sure you want to delete this asset?')) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/api/assets/${id}`, {
+      await axios.delete(`https://asset-backend-r4qe.onrender.com/api/assets/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchAssets();
@@ -200,7 +200,7 @@ const AssetsList = ({ role }) => {
     if (asset.company?.logo) {
       const img = new Image();
       img.crossOrigin = 'anonymous'; // Important for canvas
-      img.src = `http://localhost:5000${asset.company.logo}`;
+      img.src = `https://asset-backend-r4qe.onrender.com${asset.company.logo}`;
       img.onload = () => drawContent(img);
       img.onerror = () => drawContent(); // Fallback if logo fails to load
     } else {
@@ -324,7 +324,7 @@ const AssetsList = ({ role }) => {
                 <tr key={asset._id}>
                   <td>
                     <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                      {asset.image ? <img src={`http://localhost:5000${asset.image}`} className="al-asset-img" alt="" /> : <div className="al-asset-img" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)' }}>{TYPE_ICON[asset.type]}</div>}
+                      {asset.image ? <img src={`https://asset-backend-r4qe.onrender.com${asset.image}`} className="al-asset-img" alt="" /> : <div className="al-asset-img" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)' }}>{TYPE_ICON[asset.type]}</div>}
                       <div>
                         <div style={{ color: '#818cf8', fontSize: '0.7rem', fontFamily: 'monospace' }}>{asset.uniqueId}</div>
                         <div onClick={() => navigate(`/asset/${asset._id}`)} style={{ cursor: 'pointer', fontWeight: 600, color: '#f1f5f9', textDecoration: 'underline' }}>{asset.name}</div>

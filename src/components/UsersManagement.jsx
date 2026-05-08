@@ -38,7 +38,7 @@ const UsersManagement = ({ role }) => {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/users', {
+      const res = await axios.get('https://asset-backend-r4qe.onrender.com/api/users', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUsers(res.data);
@@ -48,7 +48,7 @@ const UsersManagement = ({ role }) => {
   const fetchCompanies = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/companies', {
+      const res = await axios.get('https://asset-backend-r4qe.onrender.com/api/companies', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCompanies(res.data);
@@ -87,11 +87,11 @@ const UsersManagement = ({ role }) => {
     try {
       const token = localStorage.getItem('token');
       if (editingId) {
-        await axios.put(`http://localhost:5000/api/users/${editingId}`, formData, {
+        await axios.put(`https://asset-backend-r4qe.onrender.com/api/users/${editingId}`, formData, {
           headers: { Authorization: `Bearer ${token}` }
         });
       } else {
-        await axios.post('http://localhost:5000/api/users', formData, {
+        await axios.post('https://asset-backend-r4qe.onrender.com/api/users', formData, {
           headers: { Authorization: `Bearer ${token}` }
         });
       }
@@ -105,7 +105,7 @@ const UsersManagement = ({ role }) => {
   const handleDelete = async (id) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/api/users/${id}`, {
+      await axios.delete(`https://asset-backend-r4qe.onrender.com/api/users/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setDeleteConfirm(null);

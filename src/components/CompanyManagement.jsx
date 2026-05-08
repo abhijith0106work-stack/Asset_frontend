@@ -22,7 +22,7 @@ const CompanyManagement = () => {
   const fetchCompanies = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/companies', {
+      const res = await axios.get('https://asset-backend-r4qe.onrender.com/api/companies', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCompanies(res.data);
@@ -42,7 +42,7 @@ const CompanyManagement = () => {
         contactEmail: company.contactEmail || '',
         contactPhone: company.contactPhone || ''
       });
-      setLogoPreview(company.logo ? `http://localhost:5000${company.logo}` : null);
+      setLogoPreview(company.logo ? `https://asset-backend-r4qe.onrender.com${company.logo}` : null);
     } else {
       setEditingCompany(null);
       setFormData({ name: '', address: '', contactEmail: '', contactPhone: '' });
@@ -73,9 +73,9 @@ const CompanyManagement = () => {
       if (logoFile) data.append('logo', logoFile);
 
       if (editingCompany) {
-        await axios.put(`http://localhost:5000/api/companies/${editingCompany._id}`, data, config);
+        await axios.put(`https://asset-backend-r4qe.onrender.com/api/companies/${editingCompany._id}`, data, config);
       } else {
-        await axios.post('http://localhost:5000/api/companies', data, config);
+        await axios.post('https://asset-backend-r4qe.onrender.com/api/companies', data, config);
       }
       
       setShowModal(false);
@@ -89,7 +89,7 @@ const CompanyManagement = () => {
     if (!window.confirm('Are you sure you want to delete this company?')) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/api/companies/${id}`, {
+      await axios.delete(`https://asset-backend-r4qe.onrender.com/api/companies/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchCompanies();
@@ -133,7 +133,7 @@ const CompanyManagement = () => {
         {companies.map(c => (
           <div key={c._id} className="cm-card">
             <div className="cm-card-top">
-              {c.logo ? <img src={`http://localhost:5000${c.logo}`} className="cm-logo-sm" alt="logo" /> : <div className="cm-logo-sm" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🏢</div>}
+              {c.logo ? <img src={`https://asset-backend-r4qe.onrender.com${c.logo}`} className="cm-logo-sm" alt="logo" /> : <div className="cm-logo-sm" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🏢</div>}
               <div className="cm-card-name">{c.name}</div>
             </div>
             <div className="cm-card-detail">📍 {c.address || 'No address'}</div>
