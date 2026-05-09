@@ -821,16 +821,16 @@ const Dashboard = () => {
 
       if (user.role === 'Super Admin' || user.role === 'Admin') {
         [assetsRes, ticketsRes, usersRes, activitiesRes] = await Promise.all([
-          axios.get('https://asset-backend-r4qe.onrender.com/api/assets', config),
-          axios.get('https://asset-backend-r4qe.onrender.com/api/tickets', config),
-          axios.get('https://asset-backend-r4qe.onrender.com/api/users', config).catch(() => null),
-          axios.get('https://asset-backend-r4qe.onrender.com/api/activities', config).catch(() => null)
+          axios.get('http://localhost:5000/api/assets', config),
+          axios.get('http://localhost:5000/api/tickets', config),
+          axios.get('http://localhost:5000/api/users', config).catch(() => null),
+          axios.get('http://localhost:5000/api/activities', config).catch(() => null)
         ]);
       } else {
         [assetsRes, ticketsRes, activitiesRes] = await Promise.all([
-          axios.get('https://asset-backend-r4qe.onrender.com/api/assets/me', config),
-          axios.get('https://asset-backend-r4qe.onrender.com/api/tickets', config),
-          axios.get('https://asset-backend-r4qe.onrender.com/api/activities', config).catch(() => null)
+          axios.get('http://localhost:5000/api/assets/me', config),
+          axios.get('http://localhost:5000/api/tickets', config),
+          axios.get('http://localhost:5000/api/activities', config).catch(() => null)
         ]);
       }
 

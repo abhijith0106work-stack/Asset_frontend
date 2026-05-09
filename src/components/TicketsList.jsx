@@ -41,7 +41,7 @@ const TicketsList = ({ role }) => {
   const fetchTickets = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('https://asset-backend-r4qe.onrender.com/api/tickets', {
+      const res = await axios.get('http://localhost:5000/api/tickets', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setTickets(res.data);
@@ -51,7 +51,7 @@ const TicketsList = ({ role }) => {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('https://asset-backend-r4qe.onrender.com/api/users', {
+      const res = await axios.get('http://localhost:5000/api/users', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUsers(res.data);
@@ -69,7 +69,7 @@ const TicketsList = ({ role }) => {
       fd.append('priority', raiseForm.priority);
       fd.append('category', raiseForm.category);
       if (attachmentFile) fd.append('attachment', attachmentFile);
-      await axios.post('https://asset-backend-r4qe.onrender.com/api/tickets', fd, {
+      await axios.post('http://localhost:5000/api/tickets', fd, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setIsRaiseModalOpen(false);
@@ -95,7 +95,7 @@ const TicketsList = ({ role }) => {
     setSaving(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`https://asset-backend-r4qe.onrender.com/api/tickets/${currentTicket._id}`, manageForm, {
+      await axios.put(`http://localhost:5000/api/tickets/${currentTicket._id}`, manageForm, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setIsManageModalOpen(false);
@@ -190,7 +190,7 @@ const TicketsList = ({ role }) => {
               <div className="tl-desc">{ticket.description}</div>
               <div className="tl-meta">
                 <span style={{ fontSize: '0.75rem', color: '#6366f1' }}>{CATEGORY_ICON[ticket.category]} {ticket.category}</span>
-                {ticket.attachment && <a href={`https://asset-backend-r4qe.onrender.com${ticket.attachment}`} target="_blank" rel="noreferrer" style={{ fontSize: '0.75rem', color: '#10b981', textDecoration: 'none' }}>📎 Attachment</a>}
+                {ticket.attachment && <a href={`http://localhost:5000${ticket.attachment}`} target="_blank" rel="noreferrer" style={{ fontSize: '0.75rem', color: '#10b981', textDecoration: 'none' }}>📎 Attachment</a>}
               </div>
               {ticket.remarks && (
                 <div style={{ background: 'rgba(234,179,8,0.05)', padding: '0.75rem', borderRadius: '8px', borderLeft: '3px solid #fbbf24', fontSize: '0.8rem', marginBottom: '1rem', color: '#d1d5db' }}>
