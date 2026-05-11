@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '../config';
 // import React, { useState, useEffect } from 'react';
 // import { useNavigate } from 'react-router-dom';
 // import axios from 'axios';
@@ -34,16 +35,16 @@
       
 //       if (user.role === 'Super Admin' || user.role === 'Admin') {
 //         [assetsRes, ticketsRes, usersRes, activitiesRes] = await Promise.all([
-//           axios.get('http://localhost:5000/api/assets', config),
-//           axios.get('http://localhost:5000/api/tickets', config),
-//           axios.get('http://localhost:5000/api/users', config).catch(() => null),
-//           axios.get('http://localhost:5000/api/activities', config).catch(() => null)
+//           axios.get(`${API_BASE_URL}/assets`, config),
+//           axios.get(`${API_BASE_URL}/tickets`, config),
+//           axios.get(`${API_BASE_URL}/users`, config).catch(() => null),
+//           axios.get(`${API_BASE_URL}/activities`, config).catch(() => null)
 //         ]);
 //       } else {
 //         [assetsRes, ticketsRes, activitiesRes] = await Promise.all([
-//           axios.get('http://localhost:5000/api/assets/me', config),
-//           axios.get('http://localhost:5000/api/tickets/me', config),
-//           axios.get('http://localhost:5000/api/activities', config).catch(() => null)
+//           axios.get(`${API_BASE_URL}/assets/me`, config),
+//           axios.get(`${API_BASE_URL}/tickets/me`, config),
+//           axios.get(`${API_BASE_URL}/activities`, config).catch(() => null)
 //         ]);
 //       }
       
@@ -821,16 +822,16 @@ const Dashboard = () => {
 
       if (user.role === 'Super Admin' || user.role === 'Admin') {
         [assetsRes, ticketsRes, usersRes, activitiesRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/assets', config),
-          axios.get('http://localhost:5000/api/tickets', config),
-          axios.get('http://localhost:5000/api/users', config).catch(() => null),
-          axios.get('http://localhost:5000/api/activities', config).catch(() => null)
+          axios.get(`${API_BASE_URL}/assets`, config),
+          axios.get(`${API_BASE_URL}/tickets`, config),
+          axios.get(`${API_BASE_URL}/users`, config).catch(() => null),
+          axios.get(`${API_BASE_URL}/activities`, config).catch(() => null)
         ]);
       } else {
         [assetsRes, ticketsRes, activitiesRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/assets/me', config),
-          axios.get('http://localhost:5000/api/tickets', config),
-          axios.get('http://localhost:5000/api/activities', config).catch(() => null)
+          axios.get(`${API_BASE_URL}/assets/me`, config),
+          axios.get(`${API_BASE_URL}/tickets`, config),
+          axios.get(`${API_BASE_URL}/activities`, config).catch(() => null)
         ]);
       }
 

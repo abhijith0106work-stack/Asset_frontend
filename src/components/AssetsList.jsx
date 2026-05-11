@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '../config';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { QRCodeCanvas } from 'qrcode.react';
@@ -42,8 +43,8 @@ const AssetsList = ({ role }) => {
     try {
       const token = localStorage.getItem('token');
       const url = role === 'User'
-        ? 'http://localhost:5000/api/assets/me'
-        : 'http://localhost:5000/api/assets';
+        ? `${API_BASE_URL}/assets/me`
+        : `${API_BASE_URL}/assets`;
       const res = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } });
       setAssets(res.data);
     } catch (err) { console.error(err); }
@@ -52,7 +53,7 @@ const AssetsList = ({ role }) => {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/users', {
+      const res = await axios.get(`${API_BASE_URL}/users`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUsers(res.data);
@@ -62,7 +63,7 @@ const AssetsList = ({ role }) => {
   const fetchCompanies = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/companies', {
+      const res = await axios.get(`${API_BASE_URL}/companies`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCompanies(res.data);
@@ -110,9 +111,9 @@ const AssetsList = ({ role }) => {
       if (imageFile) payload.append('image', imageFile);
 
       if (editingAssetId) {
-        await axios.put(`http://localhost:5000/api/assets/${editingAssetId}`, payload, config);
+        await axios.put(`${API_BASE_URL}/assets/${editingAssetId}`, payload, config);
       } else {
-        await axios.post('http://localhost:5000/api/assets', payload, config);
+        await axios.post(`${API_BASE_URL}/assets`, payload, config);
       }
 
       closeModal();
@@ -151,7 +152,7 @@ const AssetsList = ({ role }) => {
     if (!window.confirm('Are you sure you want to delete this asset?')) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/api/assets/${id}`, {
+      await axios.delete(`${API_BASE_URL}/assets/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchAssets();

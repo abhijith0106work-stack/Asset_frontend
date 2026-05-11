@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '../config';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -22,7 +23,7 @@ const CompanyManagement = () => {
   const fetchCompanies = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/companies', {
+      const res = await axios.get(`${API_BASE_URL}/companies`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCompanies(res.data);
@@ -73,9 +74,9 @@ const CompanyManagement = () => {
       if (logoFile) data.append('logo', logoFile);
 
       if (editingCompany) {
-        await axios.put(`http://localhost:5000/api/companies/${editingCompany._id}`, data, config);
+        await axios.put(`${API_BASE_URL}/companies/${editingCompany._id}`, data, config);
       } else {
-        await axios.post('http://localhost:5000/api/companies', data, config);
+        await axios.post(`${API_BASE_URL}/companies`, data, config);
       }
       
       setShowModal(false);
@@ -89,7 +90,7 @@ const CompanyManagement = () => {
     if (!window.confirm('Are you sure you want to delete this company?')) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/api/companies/${id}`, {
+      await axios.delete(`${API_BASE_URL}/companies/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchCompanies();

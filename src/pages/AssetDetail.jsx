@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '../config';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -22,7 +23,7 @@ const AssetDetail = () => {
     const fetchAsset = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get(`http://localhost:5000/api/assets/${id}`, {
+        const res = await axios.get(`${API_BASE_URL}/assets/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setAsset(res.data);

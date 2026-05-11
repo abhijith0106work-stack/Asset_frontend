@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '../config';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -41,7 +42,7 @@ const TicketsList = ({ role }) => {
   const fetchTickets = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/tickets', {
+      const res = await axios.get(`${API_BASE_URL}/tickets`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setTickets(res.data);
@@ -51,7 +52,7 @@ const TicketsList = ({ role }) => {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/users', {
+      const res = await axios.get(`${API_BASE_URL}/users`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUsers(res.data);
@@ -69,7 +70,7 @@ const TicketsList = ({ role }) => {
       fd.append('priority', raiseForm.priority);
       fd.append('category', raiseForm.category);
       if (attachmentFile) fd.append('attachment', attachmentFile);
-      await axios.post('http://localhost:5000/api/tickets', fd, {
+      await axios.post(`${API_BASE_URL}/tickets`, fd, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setIsRaiseModalOpen(false);
@@ -95,7 +96,7 @@ const TicketsList = ({ role }) => {
     setSaving(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`http://localhost:5000/api/tickets/${currentTicket._id}`, manageForm, {
+      await axios.put(`${API_BASE_URL}/tickets/${currentTicket._id}`, manageForm, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setIsManageModalOpen(false);
