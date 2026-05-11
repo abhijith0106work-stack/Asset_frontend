@@ -83,6 +83,6 @@ The mobile app is built with **React Native**, providing on-the-go access for em
 ---
 
 ## 6. Local Server Deployment Configuration
-- **Server IP**: 192.168.0.223 (Configured for Local Office Network)
+- **Server IP**: 192.168.0.55 (Configured for Local Office Network)
 - **Database**: Local MongoDB service
 - **Process Management**: PM2 (Process Manager 2) for background execution and auto-restart on Windows Server.

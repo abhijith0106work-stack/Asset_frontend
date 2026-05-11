@@ -65,7 +65,7 @@ nvm install 20
     ```nginx
     server {
         listen 80;
-        server_name 192.168.0.223; # Replace with your Ubuntu Server IP
+        server_name 192.168.0.55; # Replace with your Ubuntu Server IP
 
         location / {
             root /var/www/asset-system;
@@ -105,7 +105,7 @@ sudo ufw enable
 ## 5. Mobile App Configuration
 Update `mobile-app/src/api/client.js` to point to your Ubuntu server's local IP:
 ```javascript
-baseURL: 'http://192.168.0.223/api' # Nginx handles the /api prefix
+baseURL: 'http://192.168.0.55/api' # Nginx handles the /api prefix
 ```
 
 ---
