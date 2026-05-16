@@ -254,7 +254,7 @@ const AssetsList = ({ role }) => {
         .al-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
         .al-actions { display: flex; gap: 0.75rem; }
         .al-toolbar { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
-        .al-select { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 0.6rem 1rem; color: white; outline: none; }
+        .al-select { background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 0.6rem 1rem; color: white; outline: none; }
         .al-select option { background: #0f172a; }
         
         .al-table-wrap { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; overflow: hidden; }
@@ -268,7 +268,8 @@ const AssetsList = ({ role }) => {
         .al-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
         .al-form-group { margin-bottom: 1rem; }
         .al-label { display: block; color: #94a3b8; font-size: 0.75rem; margin-bottom: 0.4rem; }
-        .al-input, .al-modal-select { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 0.7rem; color: white; border-radius: 8px; }
+        .al-input, .al-modal-select { width: 100%; background: #1e293b; border: 1px solid rgba(255,255,255,0.1); padding: 0.7rem; color: white; border-radius: 8px; }
+        .al-modal-select option { background: #0f172a; color: white; }
         
         .badge { padding: 0.2rem 0.6rem; border-radius: 100px; font-size: 0.75rem; font-weight: 600; }
         .btn-primary { background: #6366f1; color: white; border: none; padding: 0.7rem 1.4rem; border-radius: 10px; cursor: pointer; font-weight: 600; }
