@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { approvalApi } from '../../api/approvalApi';
+import { exportToCSV } from '../../../../utils/exportUtils';
 
 const Departments = () => {
   const [depts, setDepts] = useState([]);
@@ -128,9 +129,15 @@ const Departments = () => {
         }
       `}</style>
 
-      <div className="dept-header">
-        <h2 className="dept-title">Departments</h2>
-        <p className="dept-subtitle">Manage organizational units and assign Department Heads</p>
+      <div className="dept-header" style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end' }}>
+        <div>
+          <h2 className="dept-title">Departments</h2>
+          <p className="dept-subtitle">Manage organizational units and assign Department Heads</p>
+        </div>
+        <button className="dept-add-btn" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'var(--text-main)', padding:'.6rem 1.2rem' }} 
+          onClick={() => exportToCSV(depts.map(d => ({ ...d, headOfDepartment: d.headOfDepartment?.name || 'Unassigned' })), `Departments_Export_${new Date().toLocaleDateString()}`, ['name', 'headOfDepartment'])}>
+          Export CSV
+        </button>
       </div>
 
       <form className="dept-form-card" onSubmit={handleCreate}>

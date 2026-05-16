@@ -337,6 +337,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { QRCodeSVG } from 'qrcode.react';
 import { API_BASE_URL } from '../config';
+import { exportToCSV } from '../utils/exportUtils';
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 const STYLES = `
@@ -702,11 +703,17 @@ const VehiclesList = ({ role }) => {
           <h2 className="vh-title">Vehicles Registry</h2>
           <p className="vh-sub">Manage company fleet and vehicle assignments</p>
         </div>
-        {isAdmin && (
-          <button className="vh-add-btn" onClick={openAdd}>
-            <Ico d="M12 5v14 M5 12h14" size={15} /> Add Vehicle
+        <div style={{ display:'flex', gap:'.75rem' }}>
+          <button className="vh-btn" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'#e2e8f0', padding:'.6rem 1.2rem', borderRadius:'12px' }} 
+            onClick={() => exportToCSV(vehicles, `Vehicles_Export_${new Date().toLocaleDateString()}`, ['plateNumber', 'make', 'model', 'year', 'color', 'status', 'company', 'assignedTo'])}>
+            <Ico d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3" size={15} /> Export CSV
           </button>
-        )}
+          {isAdmin && (
+            <button className="vh-add-btn" onClick={openAdd}>
+              <Ico d="M12 5v14 M5 12h14" size={15} /> Add Vehicle
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Grid */}

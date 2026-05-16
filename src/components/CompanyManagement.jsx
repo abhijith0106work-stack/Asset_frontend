@@ -191,6 +191,7 @@
 import { API_BASE_URL } from '../config';
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { exportToCSV } from '../utils/exportUtils';
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 const STYLES = `
@@ -524,9 +525,15 @@ const CompanyManagement = () => {
           <div className="cm-eyebrow">Super Admin</div>
           <h2 className="cm-title">Companies</h2>
         </div>
-        <button className="cm-add-btn" onClick={() => openModal()}>
-          <Ico d="M12 5v14 M5 12h14" size={15} /> Add Company
-        </button>
+        <div style={{ display:'flex', gap:'.75rem' }}>
+          <button className="cm-edit-btn" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'#e2e8f0' }} 
+            onClick={() => exportToCSV(companies, `Companies_Export_${new Date().toLocaleDateString()}`, ['name', 'address', 'contactEmail', 'contactPhone'])}>
+            <Ico d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3" size={15} /> Export CSV
+          </button>
+          <button className="cm-add-btn" onClick={() => openModal()}>
+            <Ico d="M12 5v14 M5 12h14" size={15} /> Add Company
+          </button>
+        </div>
       </div>
 
       {/* Grid */}

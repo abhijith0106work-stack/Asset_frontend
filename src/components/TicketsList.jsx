@@ -341,6 +341,7 @@
 
 
 import { API_BASE_URL } from '../config';
+import { exportToCSV } from '../utils/exportUtils';
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
@@ -760,9 +761,15 @@ const TicketsList = ({ role, onTicketCreated }) => {
           <div className="tl-eyebrow">Support</div>
           <h2 className="tl-title">Tickets</h2>
         </div>
-        <button className="tl-raise-btn" onClick={() => setIsRaiseOpen(true)}>
-          <Ico d="M12 5v14 M5 12h14" size={15} /> Raise Ticket
-        </button>
+        <div style={{ display:'flex', gap:'.75rem' }}>
+          <button className="tl-raise-btn" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'#e2e8f0' }} 
+            onClick={() => exportToCSV(filtered, `Tickets_Export_${new Date().toLocaleDateString()}`, ['ticketId', 'title', 'status', 'priority', 'category', 'assignedTo', 'createdBy', 'createdAt'])}>
+            <Ico d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3" size={15} /> Export CSV
+          </button>
+          <button className="tl-raise-btn" onClick={() => setIsRaiseOpen(true)}>
+            <Ico d="M12 5v14 M5 12h14" size={15} /> Raise Ticket
+          </button>
+        </div>
       </div>
 
       {/* Toolbar */}
