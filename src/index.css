@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+
 :root {
   --primary-color: #6366f1;
   --primary-hover: #4f46e5;
@@ -13,9 +15,7 @@
 
 body {
   margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'Outfit', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--bg-color);
@@ -87,4 +87,22 @@ label {
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--text-muted);
+}
+
+/* ==========================================
+   Premium Global Font Overrides
+   ========================================== */
+
+/* Force all text elements to use the new 'Outfit' sans-serif font */
+*, *::before, *::after {
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif !important;
+}
+
+/* Ensure all monospaced elements use 'Space Mono' */
+code, pre, kbd, samp, 
+.mono-text, 
+[class*="mono"], 
+[style*="monospace"],
+.db-brand-sub {
+  font-family: 'Space Mono', 'Courier New', Courier, monospace !important;
 }
