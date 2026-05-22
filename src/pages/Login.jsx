@@ -968,7 +968,7 @@ const Login = () => {
 
         {/* Footer */}
         <div className="lg-footer">
-          © 2025 Marysadan · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a>
+          © 2026 Marysadan · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a>
         </div>
       </div>
     </div>
