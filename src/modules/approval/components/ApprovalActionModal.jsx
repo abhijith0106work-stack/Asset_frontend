@@ -27,9 +27,11 @@ const ApprovalActionModal = ({ file, isOpen, onClose, onActionSuccess }) => {
 
   let fileUrl = null;
   if (file.fileUrl) {
-    fileUrl = `${API_BASE_URL.replace('/api', '')}/${file.fileUrl.replace(/\\/g, '/')}`;
+    const cleanPath = file.fileUrl.replace(/\\/g, '/').replace(/^\//, '');
+    fileUrl = `${API_BASE_URL.replace('/api', '')}/${cleanPath}`;
   } else if (file.attachments && file.attachments.length > 0 && file.attachments[0].url) {
-    fileUrl = `${API_BASE_URL.replace('/api', '')}/${file.attachments[0].url.replace(/\\/g, '/')}`;
+    const cleanPath = file.attachments[0].url.replace(/\\/g, '/').replace(/^\//, '');
+    fileUrl = `${API_BASE_URL.replace('/api', '')}/${cleanPath}`;
   }
 
   return (

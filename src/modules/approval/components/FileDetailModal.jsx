@@ -25,7 +25,8 @@ const FileDetailModal = ({ file, isOpen, onClose }) => {
 
   let fileUrl = null;
   if (file.fileUrl) {
-    fileUrl = `${API_BASE_URL.replace('/api', '')}/${file.fileUrl.replace(/\\/g, '/')}`;
+    const cleanPath = file.fileUrl.replace(/\\/g, '/').replace(/^\//, '');
+    fileUrl = `${API_BASE_URL.replace('/api', '')}/${cleanPath}`;
   }
 
   return (

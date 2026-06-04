@@ -936,7 +936,7 @@ const Login = () => {
               <input
                 type={showPw ? 'text' : 'password'}
                 className="lg-input"
-                placeholder="••••••••••"
+                placeholder="......"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required
