@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import AssetDetail from './pages/AssetDetail';
+import VehicleDetail from './pages/VehicleDetail';
 import approvalRoutes from './modules/approval/routes';
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard/*" element={<Dashboard />} />
           <Route path="/asset/:id" element={<AssetDetail />} />
+          <Route path="/vehicle/:id" element={<VehicleDetail />} />
           {approvalRoutes}
         </Routes>
       </div>

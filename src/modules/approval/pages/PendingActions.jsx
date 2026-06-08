@@ -411,9 +411,13 @@ const PendingActions = () => {
                 </div>
 
                 {/* Level */}
-                <div className="pa-level">
-                  <span className="pa-level-num">{file.currentLevel}</span>
-                  <span className="pa-level-label">Level</span>
+                <div className="pa-level" style={{ minWidth: '100px', textAlign: 'center' }}>
+                  <span className="pa-level-num" style={{ fontSize: '0.85rem' }}>
+                    {file.useWorkflow && file.stages && file.stages[file.currentStageIndex]
+                      ? file.stages[file.currentStageIndex].name
+                      : `Level ${file.currentLevel}`}
+                  </span>
+                  <span className="pa-level-label">Stage</span>
                 </div>
 
                 {/* CTA */}

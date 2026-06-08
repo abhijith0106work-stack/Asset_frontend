@@ -284,6 +284,89 @@ const AnnouncementsWidget = () => {
   );
 };
 
+// ─── Warranty Alerts Widget ─────────────────────────────────────────────
+const WarrantyWidget = () => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchWarranty = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await axios.get(`${API_BASE_URL}/assets/warranty-alerts`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setData(res.data);
+      } catch (err) {
+        // Not admin or no data — silent fail
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchWarranty();
+  }, []);
+
+  if (loading) return (
+    <div className="db-widget-card" style={{ marginTop: '1.5rem' }}>
+      <div className="db-widget-header"><span>🛡️</span> Warranty Monitor</div>
+      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Loading warranty data...</div>
+    </div>
+  );
+
+  if (!data) return null;
+
+  const { expiringWarranties = [], expiredWarranties = [] } = data;
+  if (expiringWarranties.length === 0 && expiredWarranties.length === 0) return (
+    <div className="db-widget-card" style={{ marginTop: '1.5rem' }}>
+      <div className="db-widget-header"><span>🛡️</span> Warranty Monitor</div>
+      <div style={{ fontSize: '0.8rem', color: '#34d399', padding: '0.5rem 0' }}>✓ All warranties are valid.</div>
+    </div>
+  );
+
+  return (
+    <div className="db-widget-card" style={{ marginTop: '1.5rem', borderColor: expiringWarranties.length > 0 || expiredWarranties.length > 0 ? 'rgba(251,191,36,0.25)' : undefined }}>
+      <div className="db-widget-header">
+        <span>🛡️</span> Warranty Monitor
+        <span style={{ marginLeft: 'auto', fontSize: '0.68rem', fontFamily: 'monospace', color: '#fbbf24' }}>
+          {expiredWarranties.length} Expired · {expiringWarranties.length} Expiring Soon
+        </span>
+      </div>
+      <div className="db-widget-list">
+        {expiredWarranties.slice(0, 3).map((a, i) => (
+          <div key={i} className="db-widget-item" style={{ borderLeft: '3px solid #ef4444', paddingLeft: '0.75rem' }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#e2e8f0' }}>{a.name}</div>
+              <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{a.uniqueId} · {a.assignedTo?.name || 'Unassigned'}</div>
+            </div>
+            <span style={{ fontSize: '0.7rem', padding: '0.2rem 0.55rem', borderRadius: '99px', background: 'rgba(239,68,68,0.12)', color: '#fca5a5', border: '1px solid rgba(239,68,68,0.3)', whiteSpace: 'nowrap' }}>
+              EXPIRED
+            </span>
+          </div>
+        ))}
+        {expiringWarranties.slice(0, 3).map((a, i) => {
+          const days = Math.ceil((new Date(a.warrantyExpiryDate) - new Date()) / 86400000);
+          return (
+            <div key={i} className="db-widget-item" style={{ borderLeft: '3px solid #fbbf24', paddingLeft: '0.75rem' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#e2e8f0' }}>{a.name}</div>
+                <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>{a.uniqueId} · {a.assignedTo?.name || 'Unassigned'}</div>
+              </div>
+              <span style={{ fontSize: '0.7rem', padding: '0.2rem 0.55rem', borderRadius: '99px', background: 'rgba(251,191,36,0.12)', color: '#fcd34d', border: '1px solid rgba(251,191,36,0.3)', whiteSpace: 'nowrap' }}>
+                {days}d left
+              </span>
+            </div>
+          );
+        })}
+        {(expiredWarranties.length + expiringWarranties.length) > 6 && (
+          <div style={{ fontSize: '0.74rem', color: '#64748b', textAlign: 'center', padding: '0.5rem 0' }}>
+            +{(expiredWarranties.length + expiringWarranties.length) - 6} more — check Assets module
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // ─── Overview Page ──────────────────────────────────────────────────────
 const OverviewPage = ({ user, kpis, kpiLoading, pending, pendingLoading, activities, setActiveTab }) => {
   const firstName = user?.name?.split(' ')[0] || 'there';
@@ -320,6 +403,7 @@ const OverviewPage = ({ user, kpis, kpiLoading, pending, pendingLoading, activit
         </div>
         <div className="db-overview-right">
           <CalendarWidget />
+          {isAdmin && <WarrantyWidget />}
           <AnnouncementsWidget />
         </div>
       </div>

@@ -13,8 +13,10 @@ const ApprovalActionModal = ({ file, isOpen, onClose, onActionSuccess }) => {
     try {
       if (type === 'approve') {
         await approvalApi.approveFile({ fileId: file._id, remarks });
+      } else if (type === 'requestChanges') {
+        await approvalApi.rejectFile({ fileId: file._id, remarks, requestChanges: true });
       } else {
-        await approvalApi.rejectFile({ fileId: file._id, remarks });
+        await approvalApi.rejectFile({ fileId: file._id, remarks, requestChanges: false });
       }
       onActionSuccess();
       onClose();
@@ -68,13 +70,16 @@ const ApprovalActionModal = ({ file, isOpen, onClose, onActionSuccess }) => {
                 {(file.history || []).length === 0 ? (
                   <div style={{ fontSize: '0.75rem', color: '#64748b' }}>No movements yet.</div>
                 ) : (
-                  file.history.map((h, i) => (
-                    <div key={i} style={{ fontSize: '0.75rem', color: '#94a3b8', borderLeft: '2px solid rgba(129,140,248,0.3)', paddingLeft: '0.75rem' }}>
-                      <div style={{ color: '#e2e8f0', fontWeight: 600 }}>{h.action.toUpperCase()} - Level {h.fromLevel}</div>
-                      <div>{h.actorId?.name} • {new Date(h.createdAt).toLocaleDateString()}</div>
-                      {h.remarks && <div style={{ color: '#64748b', fontStyle: 'italic', marginTop: '0.2rem' }}>"{h.remarks}"</div>}
-                    </div>
-                  ))
+                  file.history.map((h, i) => {
+                    const stageName = file.stages && file.stages[h.stageIndex] ? file.stages[h.stageIndex].name : `Level ${h.stageIndex + 1}`;
+                    return (
+                      <div key={i} style={{ fontSize: '0.75rem', color: '#94a3b8', borderLeft: '2px solid rgba(129,140,248,0.3)', paddingLeft: '0.75rem' }}>
+                        <div style={{ color: '#e2e8f0', fontWeight: 600 }}>{h.action.toUpperCase()} - {stageName}</div>
+                        <div>{h.actorId?.name} • {new Date(h.createdAt).toLocaleDateString()}</div>
+                        {h.remarks && <div style={{ color: '#64748b', fontStyle: 'italic', marginTop: '0.2rem' }}>"{h.remarks}"</div>}
+                      </div>
+                    );
+                  })
                 )}
               </div>
             </div>
@@ -108,16 +113,21 @@ const ApprovalActionModal = ({ file, isOpen, onClose, onActionSuccess }) => {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '1rem' }}>
+          <div style={{ display: 'flex', gap: '0.6rem' }}>
             <button 
               onClick={() => handleAction('reject')}
               disabled={loading}
               style={{ flex: 1, padding: '1rem', borderRadius: '14px', background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)', fontWeight: 700, cursor: 'pointer' }}
             >Reject</button>
             <button 
+              onClick={() => handleAction('requestChanges')}
+              disabled={loading}
+              style={{ flex: 1.3, padding: '1rem', borderRadius: '14px', background: 'rgba(245,158,11,0.1)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.2)', fontWeight: 700, cursor: 'pointer' }}
+            >Request Changes</button>
+            <button 
               onClick={() => handleAction('approve')}
               disabled={loading}
-              style={{ flex: 1, padding: '1rem', borderRadius: '14px', background: '#6366f1', color: 'white', border: 'none', fontWeight: 700, cursor: 'pointer' }}
+              style={{ flex: 1.1, padding: '1rem', borderRadius: '14px', background: '#6366f1', color: 'white', border: 'none', fontWeight: 700, cursor: 'pointer' }}
             >{loading ? '...' : 'Approve'}</button>
           </div>
           <button onClick={onClose} style={{ marginTop: '1.5rem', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '0.9rem' }}>Close Review</button>

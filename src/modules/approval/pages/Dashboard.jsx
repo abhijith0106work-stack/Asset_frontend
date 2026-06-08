@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { approvalApi } from '../api/approvalApi';
+import axios from 'axios';
+import { API_BASE_URL } from '../../../config';
 
 import MyFiles from './MyFiles';
 import PendingActions from './PendingActions';
@@ -7,6 +9,7 @@ import SubmitFile from './SubmitFile';
 import Departments from './admin/Departments';
 import Workflows from './admin/Workflows';
 import Reports from './admin/Reports';
+import CommonRepository from './CommonRepository';
 
 // ── Inject keyframes & font once ──────────────────────────────────────────────
 const STYLES = `
@@ -326,6 +329,7 @@ const ApprovalDashboard = () => {
   const isAdmin = user?.role === 'Super Admin' || user?.role === 'Admin';
   const [activeSubView, setActiveSubView] = useState('overview');
   const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0, rejected: 0 });
+  const [commonCount, setCommonCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -338,14 +342,19 @@ const ApprovalDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await approvalApi.getFiles();
-        const files = res.data;
+        const token = localStorage.getItem('token');
+        const [wfRes, commonRes] = await Promise.all([
+          approvalApi.getFiles(),
+          axios.get(`${API_BASE_URL}/common-files`, { headers: { Authorization: `Bearer ${token}` } })
+        ]);
+        const files = wfRes.data;
         setStats({
           total:    files.length,
           pending:  files.filter(f => f.status === 'submitted' || f.status === 'under_review').length,
           approved: files.filter(f => f.status === 'approved').length,
           rejected: files.filter(f => f.status === 'rejected').length,
         });
+        setCommonCount(commonRes.data.length);
       } catch (err) { console.error(err); }
       finally { setLoading(false); }
     };
@@ -353,11 +362,11 @@ const ApprovalDashboard = () => {
   }, []);
 
   const navItems = [
-    'overview', 'my-files', 'pending',
+    'overview', 'my-files', 'pending', 'common-repository',
     ...(isAdmin ? ['departments', 'workflows', 'reports'] : []),
   ];
 
-  const label = v => v.charAt(0).toUpperCase() + v.slice(1).replace('-', ' ');
+  const label = v => v.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 
   return (
     <div className="ap-root">
@@ -394,6 +403,7 @@ const ApprovalDashboard = () => {
               <StatCard label="Pending Approval" value={stats.pending}  color="#f59e0b" icon={ICONS.pending} sub="Awaiting review"           delay="0.1s"  loading={loading} />
               <StatCard label="Approved"         value={stats.approved} color="#10b981" icon={ICONS.check}   sub="Successfully cleared"      delay="0.15s" loading={loading} />
               <StatCard label="Rejected"         value={stats.rejected} color="#ef4444" icon={ICONS.x}       sub="Returned for revision"    delay="0.2s"  loading={loading} />
+              <StatCard label="Shared Documents" value={commonCount}    color="#8b5cf6" icon={ICONS.files}   sub="Common shared library"     delay="0.25s" loading={loading} />
             </div>
 
             {/* Quick actions */}
@@ -406,6 +416,9 @@ const ApprovalDashboard = () => {
               </button>
               <button className="ap-quick-btn" onClick={() => setActiveSubView('pending')}>
                 <Icon d={ICONS.eye} size={15} /> Pending Actions
+              </button>
+              <button className="ap-quick-btn" onClick={() => setActiveSubView('common-repository')}>
+                📁 Shared Documents
               </button>
             </div>
 
@@ -426,6 +439,7 @@ const ApprovalDashboard = () => {
         {activeSubView === 'departments' && <Departments />}
         {activeSubView === 'workflows'   && <Workflows />}
         {activeSubView === 'reports'     && <Reports />}
+        {activeSubView === 'common-repository' && <CommonRepository />}
       </div>
     </div>
   );

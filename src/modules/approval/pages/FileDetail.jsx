@@ -309,7 +309,10 @@ const FileDetail = () => {
 
   if (!file) return null;
 
-  const progress = pct(file.currentLevel, file.totalLevels);
+  const isWorkflow = file.useWorkflow && file.stages && file.stages.length > 0;
+  const currentLevelIndex = isWorkflow ? file.currentStageIndex : (file.currentLevel - 1);
+  const totalLevelsCount = isWorkflow ? file.stages.length : file.totalLevels;
+  const progress = file.status === 'approved' ? 100 : pct(currentLevelIndex, totalLevelsCount);
   const history = file.approvalHistory || [];
 
   return (
@@ -330,7 +333,11 @@ const FileDetail = () => {
 
           <div className="fd-badges">
             <span className={STATUS_BADGE(file.status)}>{file.status.replace('_', ' ')}</span>
-            <span className="fd-badge fd-badge-level">Level {file.currentLevel} / {file.totalLevels}</span>
+            <span className="fd-badge fd-badge-level">
+              {isWorkflow 
+                ? `Stage ${currentLevelIndex + 1} / ${totalLevelsCount}` 
+                : `Level ${file.currentLevel} / ${file.totalLevels}`}
+            </span>
             {file.department && (
               <span className="fd-badge fd-badge-level">{file.department}</span>
             )}
@@ -367,16 +374,27 @@ const FileDetail = () => {
               <div className="fd-progress-fill" style={{ width: `${progress}%` }} />
             </div>
             <div className="fd-progress-steps">
-              {Array.from({ length: file.totalLevels }, (_, i) => {
-                const step = i + 1;
-                const cls = step < file.currentLevel ? 'done'
-                          : step === file.currentLevel ? 'active' : '';
-                return (
-                  <div key={step} className={`fd-progress-step ${cls}`}>
-                    L{step}
-                  </div>
-                );
-              })}
+              {isWorkflow 
+                ? file.stages.map((stage, i) => {
+                    const cls = i < file.currentStageIndex ? 'done'
+                              : i === file.currentStageIndex ? 'active' : '';
+                    return (
+                      <div key={i} className={`fd-progress-step ${cls}`} title={stage.name} style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', padding: '0 4px' }}>
+                        {stage.name}
+                      </div>
+                    );
+                  })
+                : Array.from({ length: file.totalLevels }, (_, i) => {
+                    const step = i + 1;
+                    const cls = step < file.currentLevel ? 'done'
+                              : step === file.currentLevel ? 'active' : '';
+                    return (
+                      <div key={step} className={`fd-progress-step ${cls}`}>
+                        L{step}
+                      </div>
+                    );
+                  })
+              }
             </div>
           </div>
         </div>
@@ -419,13 +437,13 @@ const FileDetail = () => {
             ))}
 
             {/* Future steps placeholder */}
-            {file.currentLevel < file.totalLevels && file.status !== 'rejected' && (
+            {((isWorkflow && file.currentStageIndex < file.stages.length) || (!isWorkflow && file.currentLevel < file.totalLevels)) && file.status !== 'rejected' && file.status !== 'approved' && (
               <div className="fd-tl-item" style={{ animationDelay: `${0.1 + history.length * 0.06}s` }}>
                 <div className="fd-tl-dot fd-tl-dot-pending" style={{ animation: 'fd-pulse 2s ease infinite' }}>
                   <Icon d="M12 6v6l4 2" />
                 </div>
                 <div className="fd-tl-event" style={{ color:'#334155' }}>
-                  Awaiting Level {file.currentLevel} Review
+                  Awaiting {isWorkflow ? file.stages[file.currentStageIndex]?.name : `Level ${file.currentLevel}`} Review
                 </div>
                 <div className="fd-tl-meta">Pending approver action</div>
               </div>

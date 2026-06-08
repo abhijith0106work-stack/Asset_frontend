@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { exportToCSV } from '../utils/exportUtils';
+import { API_BASE_URL } from '../config';
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 const STYLES = `
@@ -254,6 +256,53 @@ const STYLES = `
   }
   .tl-preview-title { font-family:'Syne',sans-serif;font-size:.92rem;font-weight:700;color:#f1f5f9;margin-bottom:.4rem; }
   .tl-preview-badges { display:flex;gap:.5rem;flex-wrap:wrap; }
+
+  /* New Wide Manage layout */
+  .tl-modal.manage-wide { max-width: 880px; }
+  .tl-manage-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+  @media(min-width: 768px) {
+    .tl-manage-grid { grid-template-columns: 1fr 1fr; }
+  }
+  .tl-manage-col-left { display: flex; flex-direction: column; gap: 1rem; }
+  .tl-manage-col-right {
+    display: flex; flex-direction: column;
+    border-left: 1px solid rgba(255,255,255,0.07);
+    padding-left: 1.5rem;
+    min-height: 380px;
+  }
+  @media(max-width: 767px) {
+    .tl-manage-col-right { border-left: none; padding-left: 0; border-top: 1px solid rgba(255,255,255,0.07); padding-top: 1.5rem; }
+  }
+  .tl-modal-tabs { display: flex; gap: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.07); margin-bottom: 1rem; }
+  .tl-modal-tab-btn {
+    padding: 0.5rem 1rem; background: none; border: none; color: #64748b; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.2s; border-bottom: 2px solid transparent; font-size: 0.8rem;
+  }
+  .tl-modal-tab-btn:hover { color: #cbd5e1; }
+  .tl-modal-tab-btn.active { color: #6366f1; border-bottom-color: #6366f1; }
+  
+  .tl-comments-list { display: flex; flex-direction: column; gap: 0.8rem; max-height: 250px; overflow-y: auto; margin-bottom: 1rem; padding-right: 0.5rem; }
+  .tl-comments-list::-webkit-scrollbar { width: 3px; }
+  .tl-comments-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 3px; }
+  .tl-comment-item { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 0.7rem; border-radius: 10px; }
+  .tl-comment-meta { display: flex; justify-content: space-between; font-size: 0.68rem; color: #64748b; margin-bottom: 0.25rem; font-family: 'DM Mono', monospace; }
+  .tl-comment-text { font-size: 0.8rem; color: #cbd5e1; line-height: 1.4; }
+  
+  .tl-comment-form { display: flex; flex-direction: column; gap: 0.6rem; }
+  .tl-comment-input-row { display: flex; gap: 0.5rem; }
+  .tl-comment-file-zone { border: 1px dashed rgba(255,255,255,0.08); padding: 0.4rem; border-radius: 8px; font-size: 0.75rem; text-align: center; color: #64748b; cursor: pointer; position: relative; }
+  .tl-comment-file-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  
+  .tl-activities-list { display: flex; flex-direction: column; gap: 0.8rem; max-height: 350px; overflow-y: auto; padding-right: 0.5rem; }
+  .tl-activities-list::-webkit-scrollbar { width: 3px; }
+  .tl-activities-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 3px; }
+  .tl-activity-item { display: flex; gap: 0.6rem; font-size: 0.78rem; position: relative; padding-bottom: 0.5rem; }
+  .tl-activity-item::before { content: ''; position: absolute; left: 7px; top: 18px; bottom: 0; width: 1px; background: rgba(255,255,255,0.05); }
+  .tl-activity-item:last-child::before { display: none; }
+  .tl-activity-dot { width: 15px; height: 15px; border-radius: 50%; background: #6366f1; border: 3px solid #0d1117; flex-shrink: 0; }
+  .tl-activity-info { display: flex; flex-direction: column; }
+  .tl-activity-action { font-weight: 600; color: #f8fafc; }
+  .tl-activity-remarks { font-size: 0.72rem; color: #64748b; margin-top: 0.15rem; }
+  .tl-activity-meta { font-size: 0.65rem; color: #475569; margin-top: 0.1rem; font-family: 'DM Mono', monospace; }
 `;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -288,9 +337,11 @@ const CAT_ICONS = {
 };
 
 // ── Component ─────────────────────────────────────────────────────────────────
+// ── Component ─────────────────────────────────────────────────────────────────
 const TicketsList = ({ role, onTicketCreated }) => {
   const [tickets, setTickets]               = useState([]);
   const [users, setUsers]                   = useState([]);
+  const [departments, setDepartments]       = useState([]);
   const [vehicles, setVehicles]             = useState([]);
   const [loading, setLoading]               = useState(true);
   const [isRaiseOpen, setIsRaiseOpen]       = useState(false);
@@ -301,10 +352,20 @@ const TicketsList = ({ role, onTicketCreated }) => {
   const [saving, setSaving]                 = useState(false);
   const [attachFile, setAttachFile]         = useState(null);
 
+  // Comments and activities states
+  const [comments, setComments]             = useState([]);
+  const [commentContent, setCommentContent] = useState('');
+  const [commentFile, setCommentFile]       = useState(null);
+  const [activities, setActivities]         = useState([]);
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [loadingActivities, setLoadingActivities] = useState(false);
+  const [modalTab, setModalTab]             = useState('comments'); // 'comments' | 'activity'
+
   const [raiseForm, setRaiseForm] = useState({ title:'', description:'', priority:'Medium', category:'IT', vehicleId:'' });
-  const [manageForm, setManageForm] = useState({ assignedTo:'', status:'', remarks:'' });
+  const [manageForm, setManageForm] = useState({ assignedTo:'', assignedDepartment:'', status:'', remarks:'' });
 
   const fileRef = useRef();
+  const commentFileRef = useRef();
   const currentUser = JSON.parse(localStorage.getItem('user'));
   const isOpsAdmin  = (currentUser.role === 'Admin' || currentUser.role === 'Company Admin') && currentUser.department?.name?.toLowerCase().includes('operations');
   const isSuperAdmin = currentUser.role === 'Super Admin';
@@ -319,7 +380,10 @@ const TicketsList = ({ role, onTicketCreated }) => {
 
   useEffect(() => {
     fetchTickets();
-    if (isAdminOrOps) fetchUsers();
+    if (isAdminOrOps) {
+      fetchUsers();
+      fetchDepartments();
+    }
     fetchVehicles();
   }, [role]);
 
@@ -340,12 +404,66 @@ const TicketsList = ({ role, onTicketCreated }) => {
     } catch (err) { console.error(err); }
   };
 
+  const fetchDepartments = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${API_BASE_URL}/departments`, { headers:{ Authorization:`Bearer ${token}` } });
+      setDepartments(res.data);
+    } catch (err) { console.error(err); }
+  };
+
   const fetchVehicles = async () => {
     try {
       const token = localStorage.getItem('token');
       const res = await axios.get(`${API_BASE_URL}/vehicles`, { headers:{ Authorization:`Bearer ${token}` } });
       setVehicles(res.data);
     } catch (err) { console.error(err); }
+  };
+
+  const fetchComments = async (tid) => {
+    setLoadingComments(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${API_BASE_URL}/tickets/${tid}/comments`, { headers:{ Authorization:`Bearer ${token}` } });
+      setComments(res.data);
+    } catch (err) { console.error(err); }
+    finally { setLoadingComments(false); }
+  };
+
+  const fetchActivities = async (tid) => {
+    setLoadingActivities(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${API_BASE_URL}/tickets/${tid}/activities`, { headers:{ Authorization:`Bearer ${token}` } });
+      setActivities(res.data);
+    } catch (err) { console.error(err); }
+    finally { setLoadingActivities(false); }
+  };
+
+  const handleAddComment = async (e) => {
+    e.preventDefault();
+    if (!commentContent.trim() && !commentFile) return;
+    try {
+      const token = localStorage.getItem('token');
+      const fd = new FormData();
+      fd.append('content', commentContent);
+      if (commentFile) fd.append('attachment', commentFile);
+      
+      await axios.post(`${API_BASE_URL}/tickets/${currentTicket._id}/comments`, fd, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      setCommentContent('');
+      setCommentFile(null);
+      if (commentFileRef.current) commentFileRef.current.value = '';
+      fetchComments(currentTicket._id);
+      fetchActivities(currentTicket._id);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to post comment.');
+    }
   };
 
   const setR = (k, v) => setRaiseForm(p => ({ ...p, [k]: v }));
@@ -370,8 +488,16 @@ const TicketsList = ({ role, onTicketCreated }) => {
 
   const openManage = (ticket) => {
     setCurrentTicket(ticket);
-    setManageForm({ assignedTo: ticket.assignedTo?._id||ticket.assignedTo||'', status: ticket.status, remarks: ticket.remarks||'' });
+    setManageForm({
+      assignedTo: ticket.assignedTo?._id||ticket.assignedTo||'',
+      assignedDepartment: ticket.assignedDepartment?._id||ticket.assignedDepartment||'',
+      status: ticket.status,
+      remarks: ticket.remarks||''
+    });
     setIsManageOpen(true);
+    setModalTab('comments');
+    fetchComments(ticket._id);
+    fetchActivities(ticket._id);
   };
 
   const handleManage = async (e) => {
@@ -380,7 +506,8 @@ const TicketsList = ({ role, onTicketCreated }) => {
       const token = localStorage.getItem('token');
       const data = { status: manageForm.status, remarks: manageForm.remarks };
       if (isAdminOrOps) {
-        data.assignedTo = manageForm.assignedTo;
+        data.assignedTo = manageForm.assignedTo || null;
+        data.assignedDepartment = manageForm.assignedDepartment || null;
       }
       await axios.put(`${API_BASE_URL}/tickets/${currentTicket._id}`, data, { headers:{ Authorization:`Bearer ${token}` } });
       setIsManageOpen(false); fetchTickets();
@@ -623,10 +750,10 @@ const TicketsList = ({ role, onTicketCreated }) => {
       {/* Manage Ticket Modal */}
       {isManageOpen && currentTicket && (
         <div className="tl-overlay" onClick={e => e.target === e.currentTarget && setIsManageOpen(false)}>
-          <div className="tl-modal">
+          <div className="tl-modal manage-wide">
             <div className="tl-modal-accent" />
             <div className="tl-modal-header">
-              <div className="tl-modal-title">Manage Ticket</div>
+              <div className="tl-modal-title">Manage Ticket #{currentTicket.ticketId || currentTicket._id.slice(-6).toUpperCase()}</div>
               <button className="tl-modal-close" onClick={() => setIsManageOpen(false)}>
                 <Ico d="M18 6L6 18 M6 6l12 12" size={14} />
               </button>
@@ -635,6 +762,7 @@ const TicketsList = ({ role, onTicketCreated }) => {
               {/* Ticket preview */}
               <div className="tl-preview">
                 <div className="tl-preview-title">{currentTicket.title}</div>
+                <div style={{ fontSize: '.8rem', color: '#64748b', marginBottom: '.6rem' }}>{currentTicket.description}</div>
                 <div className="tl-preview-badges">
                   {[PRIORITY_CFG[currentTicket.priority], STATUS_CFG[currentTicket.status]].map((cfg, i) => cfg && (
                     <span key={i} className="tl-badge" style={{ background:cfg.bg, border:`1px solid ${cfg.border}`, color:cfg.text, fontSize:'.66rem' }}>
@@ -642,43 +770,131 @@ const TicketsList = ({ role, onTicketCreated }) => {
                       {i === 0 ? currentTicket.priority : currentTicket.status}
                     </span>
                   ))}
+                  {currentTicket.assetId && (
+                    <span className="tl-badge" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#a5b4fc', cursor: 'pointer' }} onClick={() => navigate(`/asset/${currentTicket.assetId._id || currentTicket.assetId}`)}>
+                      🖥️ Linked Asset: {currentTicket.assetId.name || 'View Profile'}
+                    </span>
+                  )}
                 </div>
               </div>
 
-              <form onSubmit={handleManage}>
-                <div className="tl-field">
-                  <label className="tl-label">Update Status</label>
-                  <div className="tl-select-wrap">
-                    <select className="tl-select" value={manageForm.status} onChange={e => setM('status', e.target.value)}>
-                      {getStatusOpts(currentTicket).map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
-                  </div>
-                </div>
-
-                {isAdminOrOps && (
-                  <div className="tl-field">
-                    <label className="tl-label">Assign To</label>
-                    <div className="tl-select-wrap">
-                      <select className="tl-select" value={manageForm.assignedTo} onChange={e => setM('assignedTo', e.target.value)}>
-                        <option value="">Unassigned</option>
-                        {users.map(u => <option key={u._id} value={u._id}>{u.name} ({u.role}) · {u.department?.name || 'No dept'}</option>)}
-                      </select>
+              <div className="tl-manage-grid">
+                {/* Left Column: Form */}
+                <div className="tl-manage-col-left">
+                  <form onSubmit={handleManage}>
+                    <div className="tl-field">
+                      <label className="tl-label">Update Status</label>
+                      <div className="tl-select-wrap">
+                        <select className="tl-select" value={manageForm.status} onChange={e => setM('status', e.target.value)}>
+                          {getStatusOpts(currentTicket).map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                      </div>
                     </div>
+
+                    {isAdminOrOps && (
+                      <>
+                        <div className="tl-field">
+                          <label className="tl-label">Assign Department</label>
+                          <div className="tl-select-wrap">
+                            <select className="tl-select" value={manageForm.assignedDepartment} onChange={e => setM('assignedDepartment', e.target.value)}>
+                              <option value="">Unassigned</option>
+                              {departments.map(d => <option key={d._id} value={d._id}>{d.name}</option>)}
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="tl-field">
+                          <label className="tl-label">Assign Technician</label>
+                          <div className="tl-select-wrap">
+                            <select className="tl-select" value={manageForm.assignedTo} onChange={e => setM('assignedTo', e.target.value)}>
+                              <option value="">Unassigned</option>
+                              {users.map(u => <option key={u._id} value={u._id}>{u.name} ({u.role}) · {u.department?.name || 'No dept'}</option>)}
+                            </select>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    <div className="tl-field">
+                      <label className="tl-label">Remarks / Resolution</label>
+                      <textarea className="tl-textarea" placeholder="Add resolution details or notes…" value={manageForm.remarks} onChange={e => setM('remarks', e.target.value)} />
+                    </div>
+
+                    <div className="tl-modal-footer" style={{ padding: 0 }}>
+                      <button type="button" className="tl-cancel-btn" onClick={() => setIsManageOpen(false)}>Cancel</button>
+                      <button type="submit" className="tl-save-btn" disabled={saving}>
+                        {saving ? <><span className="tl-spinner" /> Updating…</> : <><Ico d="M20 6L9 17l-5-5" size={15} /> Update Ticket</>}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
+                {/* Right Column: Collaboration & Activity timeline */}
+                <div className="tl-manage-col-right">
+                  <div className="tl-modal-tabs">
+                    <button type="button" className={`tl-modal-tab-btn${modalTab === 'comments' ? ' active' : ''}`} onClick={() => setModalTab('comments')}>
+                      💬 Comments ({comments.length})
+                    </button>
+                    <button type="button" className={`tl-modal-tab-btn${modalTab === 'activity' ? ' active' : ''}`} onClick={() => setModalTab('activity')}>
+                      ⏱️ Activity Log ({activities.length})
+                    </button>
                   </div>
-                )}
 
-                <div className="tl-field">
-                  <label className="tl-label">Remarks / Resolution</label>
-                  <textarea className="tl-textarea" placeholder="Add resolution details or notes…" value={manageForm.remarks} onChange={e => setM('remarks', e.target.value)} />
-                </div>
+                  {modalTab === 'comments' && (
+                    <div style={{ display:'flex', flexDirection:'column', flexGrow:1 }}>
+                      <div className="tl-comments-list">
+                        {loadingComments ? (
+                          <div style={{fontSize:'.75rem',color:'#64748b'}}>Loading comments...</div>
+                        ) : comments.length === 0 ? (
+                          <div style={{fontSize:'.75rem',color:'#475569',textAlign:'center',padding:'1.5rem'}}>No comments yet. Start the conversation!</div>
+                        ) : comments.map(c => (
+                          <div key={c._id} className="tl-comment-item">
+                            <div className="tl-comment-meta">
+                              <span>{c.userId?.name || 'User'} ({c.userId?.role || 'Staff'})</span>
+                              <span>{new Date(c.createdAt).toLocaleTimeString()}</span>
+                            </div>
+                            <div className="tl-comment-text">{c.content}</div>
+                            {c.attachment && (
+                              <div style={{marginTop:'.35rem', fontSize:'.7rem'}}>
+                                📎 <a href={`http://localhost:5000${c.attachment}`} target="_blank" rel="noreferrer" style={{color:'#10b981',textDecoration:'none'}}>View Attachment</a>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      <form onSubmit={handleAddComment} className="tl-comment-form">
+                        <div className="tl-comment-input-row">
+                          <input className="tl-input" placeholder="Type a comment…" value={commentContent} onChange={e => setCommentContent(e.target.value)} />
+                          <button type="submit" className="tl-raise-btn" style={{padding:'0 .8rem', borderRadius:'10px', boxShadow:'none'}} disabled={!commentContent.trim() && !commentFile}>Post</button>
+                        </div>
+                        <div className="tl-comment-file-zone" onClick={() => commentFileRef.current?.click()}>
+                          <input ref={commentFileRef} type="file" style={{display:'none'}} onChange={e => setCommentFile(e.target.files[0])} />
+                          {commentFile ? `📎 ${commentFile.name}` : 'Attach image/log file'}
+                        </div>
+                      </form>
+                    </div>
+                  )}
 
-                <div className="tl-modal-footer">
-                  <button type="button" className="tl-cancel-btn" onClick={() => setIsManageOpen(false)}>Cancel</button>
-                  <button type="submit" className="tl-save-btn" disabled={saving}>
-                    {saving ? <><span className="tl-spinner" /> Updating…</> : <><Ico d="M20 6L9 17l-5-5" size={15} /> Update</>}
-                  </button>
+                  {modalTab === 'activity' && (
+                    <div className="tl-activities-list">
+                      {loadingActivities ? (
+                        <div style={{fontSize:'.75rem',color:'#64748b'}}>Loading activities...</div>
+                      ) : activities.length === 0 ? (
+                        <div style={{fontSize:'.75rem',color:'#475569',textAlign:'center',padding:'1.5rem'}}>No activities logged.</div>
+                      ) : activities.map(act => (
+                        <div key={act._id} className="tl-activity-item">
+                          <div className="tl-activity-dot" />
+                          <div className="tl-activity-info">
+                            <span className="tl-activity-action">{act.action}</span>
+                            {act.remarks && <span className="tl-activity-remarks">"{act.remarks}"</span>}
+                            <span className="tl-activity-meta">By {act.actorId?.name || 'System'} · {new Date(act.timestamp).toLocaleString()}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </form>
+              </div>
             </div>
           </div>
         </div>

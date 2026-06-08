@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { QRCodeSVG } from 'qrcode.react';
 import { API_BASE_URL } from '../config';
@@ -255,6 +256,7 @@ const SkeletonCard = ({ delay }) => (
 
 // ── Component ─────────────────────────────────────────────────────────────────
 const VehiclesList = ({ role }) => {
+  const navigate = useNavigate();
   const [vehicles, setVehicles]   = useState([]);
   const [companies, setCompanies] = useState([]);
   const [users, setUsers]         = useState([]);
@@ -263,6 +265,58 @@ const VehiclesList = ({ role }) => {
   const [loading, setLoading]     = useState(true);
   const [saving, setSaving]       = useState(false);
   const [qrModal, setQrModal]     = useState(null);
+  const [qrLoading, setQrLoading] = useState(false);
+  const [selectedVehicles, setSelectedVehicles] = useState([]);
+  const [bulkGenerating, setBulkGenerating] = useState(false);
+
+  const handleSelect = (id) => {
+    setSelectedVehicles(prev => prev.includes(id) ? prev.filter(v => v !== id) : [...prev, id]);
+  };
+
+  const handleSelectAll = () => {
+    if (selectedVehicles.length === vehicles.length) setSelectedVehicles([]);
+    else setSelectedVehicles(vehicles.map(v => v._id));
+  };
+
+  const openQRModal = async (v) => {
+    setQrModal({ ...v, loading: true });
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.post(`${API_BASE_URL}/vehicles/${v._id}/generate-qr`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      setQrModal({ ...res.data, loading: false });
+      // Update local vehicle state with the new image URLs
+      setVehicles(prev => prev.map(item => item._id === v._id ? res.data : item));
+    } catch (err) {
+      console.error(err);
+      setQrModal(null);
+      alert('Failed: ' + (err.response?.data?.message || err.message));
+    }
+  };
+
+  const handleBulkExport = async () => {
+    if (selectedVehicles.length === 0) return alert('Select at least one vehicle for bulk export.');
+    setBulkGenerating(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.post(`${API_BASE_URL}/vehicles/bulk-qr-export`, { vehicleIds: selectedVehicles }, { 
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob' 
+      });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'Vehicle_QR_Labels.zip');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setSelectedVehicles([]);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to generate bulk QR ZIP archive.');
+    } finally {
+      setBulkGenerating(false);
+    }
+  };
 
   const [formData, setFormData] = useState({
     make:'', model:'', plateNumber:'', year: new Date().getFullYear(),
@@ -369,6 +423,17 @@ const VehiclesList = ({ role }) => {
           <p className="vh-sub">Manage company fleet and vehicle assignments</p>
         </div>
         <div style={{ display:'flex', gap:'.75rem' }}>
+          {isAdmin && vehicles.length > 0 && (
+            <button className="vh-btn" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'#e2e8f0', padding:'.6rem 1.2rem', borderRadius:'12px' }} 
+              onClick={handleSelectAll}>
+              <Ico d="M9 11l3 3L22 4" size={15} /> {selectedVehicles.length === vehicles.length ? 'Deselect All' : 'Select All'}
+            </button>
+          )}
+          {selectedVehicles.length > 0 && (
+            <button className="vh-add-btn" style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }} onClick={handleBulkExport} disabled={bulkGenerating}>
+              {bulkGenerating ? <span className="vh-spinner" /> : <Ico d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3" size={15} />} Bulk Export Labels ({selectedVehicles.length})
+            </button>
+          )}
           <button className="vh-btn" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'#e2e8f0', padding:'.6rem 1.2rem', borderRadius:'12px' }} 
             onClick={() => exportToCSV(vehicles, `Vehicles_Export_${new Date().toLocaleDateString()}`, ['plateNumber', 'make', 'model', 'year', 'color', 'status', 'company', 'assignedTo'])}>
             <Ico d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3" size={15} /> Export CSV
@@ -398,6 +463,12 @@ const VehiclesList = ({ role }) => {
               return (
                 <div className="vh-card" key={v._id} style={{ animationDelay:`${i*.06}s` }}>
                   <div className="vh-card-accent" style={{ background: sc.bar }} />
+                  
+                  {isAdmin && (
+                    <div style={{ position: 'absolute', top: '1.2rem', right: '1.2rem', zIndex: 10 }}>
+                      <input type="checkbox" style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#6366f1' }} checked={selectedVehicles.includes(v._id)} onChange={() => handleSelect(v._id)} />
+                    </div>
+                  )}
 
                   <div className="vh-plate">
                     <Ico d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5z M9 9h6 M9 12h6 M9 15h4" size={12} />
@@ -430,8 +501,11 @@ const VehiclesList = ({ role }) => {
                   </div>
 
                   <div className="vh-card-footer">
-                    <button className="vh-btn vh-btn-qr" onClick={() => setQrModal(v)}>
+                    <button className="vh-btn vh-btn-qr" onClick={() => openQRModal(v)}>
                       <Ico d="M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h3 M14 21h3 M17 17h3v4 M20 14v3" size={13} /> QR
+                    </button>
+                    <button className="vh-btn" onClick={() => navigate('/vehicle/' + v._id)}>
+                      <Ico d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" size={13} /> Logbook
                     </button>
                     {isAdmin && (
                       <button className="vh-btn vh-btn-edit" onClick={() => openEdit(v)}>
@@ -548,24 +622,42 @@ const VehiclesList = ({ role }) => {
       {/* QR Modal */}
       {qrModal && (
         <div className="vh-overlay" onClick={e => e.target === e.currentTarget && setQrModal(null)}>
-          <div className="vh-qr-modal">
+          <div className="vh-qr-modal" style={{ maxWidth: '420px', padding: '1.5rem' }}>
             <div className="vh-qr-modal-accent" />
-            <div className="vh-qr-title">Vehicle QR Code</div>
-            <div className="vh-qr-box">
-              <QRCodeSVG
-                id={`qr-${qrModal._id}`}
-                value={JSON.stringify({ type:'vehicle', id:qrModal._id, plate:qrModal.plateNumber })}
-                size={190} level="H" includeMargin
-              />
-            </div>
-            <div className="vh-qr-plate">{qrModal.plateNumber}</div>
-            <div className="vh-qr-name">{qrModal.make} {qrModal.model} · {qrModal.year}</div>
-            <div className="vh-modal-footer">
-              <button className="vh-cancel-btn" onClick={() => setQrModal(null)}>Close</button>
-              <button className="vh-save-btn" onClick={() => downloadQR(`qr-${qrModal._id}`, qrModal.plateNumber)}>
-                <Ico d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3" size={15} /> Download SVG
-              </button>
-            </div>
+            <div className="vh-qr-title">Vehicle QR Label</div>
+            
+            {qrModal.loading ? (
+              <div style={{ padding: '3rem 0', color: '#64748b' }}>
+                <div className="vh-spinner" style={{ margin: '0 auto 1rem', width: 24, height: 24, borderColor: 'rgba(99,102,241,0.3)', borderTopColor: '#6366f1' }} />
+                Generating high-res PNG label...
+              </div>
+            ) : (
+              <>
+                <div style={{ background: '#fff', borderRadius: '12px', padding: '1rem', marginBottom: '1.5rem' }}>
+                  <img src={`${API_BASE_URL.replace('/api', '')}${qrModal.qrLabelImage}`} alt="Vehicle Label" style={{ width: '100%', height: 'auto', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
+                </div>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.5rem' }}>
+                  <a href={`${API_BASE_URL.replace('/api', '')}${qrModal.qrLabelImage}`} download={`Label_${qrModal.plateNumber}.png`} target="_blank" rel="noreferrer" className="vh-btn" style={{ background: 'rgba(99,102,241,0.1)', color: '#818cf8', borderColor: 'rgba(99,102,241,0.2)' }}>
+                    <Ico d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3" /> Download Label PNG
+                  </a>
+                  <a href={`${API_BASE_URL.replace('/api', '')}${qrModal.qrImage}`} download={`QR_${qrModal.plateNumber}.png`} target="_blank" rel="noreferrer" className="vh-btn">
+                    <Ico d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3" /> Download QR PNG
+                  </a>
+                  <button className="vh-btn" style={{ background: 'rgba(16,185,129,0.1)', color: '#34d399', borderColor: 'rgba(16,185,129,0.2)' }} onClick={() => {
+                    const printWindow = window.open('', '_blank');
+                    printWindow.document.write(`<html><body style="margin:0;padding:20px;text-align:center;"><img src="${API_BASE_URL.replace('/api', '')}${qrModal.qrLabelImage}" style="max-width:100%;height:auto;" onload="window.print();window.close();" /></body></html>`);
+                    printWindow.document.close();
+                  }}>
+                    <Ico d="M6 9V2h12v7 M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2 M6 14h12v8H6z" /> Print Label
+                  </button>
+                </div>
+                
+                <div className="vh-modal-footer">
+                  <button className="vh-cancel-btn" onClick={() => setQrModal(null)}>Close</button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

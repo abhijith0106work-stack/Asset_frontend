@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '../../../config';
 
-const UploadCommonFile = ({ onBack, onSuccess }) => {
+const UploadCommonFile = ({ folderId, onBack, onSuccess }) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -29,6 +29,9 @@ const UploadCommonFile = ({ onBack, onSuccess }) => {
       data.append('description', formData.description);
       data.append('category', formData.category);
       data.append('tags', JSON.stringify(formData.tags.split(',').map(t => t.trim()).filter(t => t)));
+      if (folderId) {
+        data.append('folderId', folderId);
+      }
       data.append('file', file);
 
       await axios.post(`${API_BASE_URL}/common-files`, data, {

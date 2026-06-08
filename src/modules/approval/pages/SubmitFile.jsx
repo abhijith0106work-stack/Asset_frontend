@@ -383,6 +383,9 @@ const SubmitFile = ({ onBack }) => {
   const [file, setFile] = useState(null);
   const [departments, setDepartments] = useState([]);
   const [users, setUsers] = useState([]);
+  const [templates, setTemplates] = useState([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState('');
+  const [dynamicFields, setDynamicFields] = useState({});
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [useWorkflow, setUseWorkflow] = useState(true);
@@ -398,6 +401,7 @@ const SubmitFile = ({ onBack }) => {
 
   useEffect(() => {
     approvalApi.getDepartments().then(res => setDepartments(res.data)).catch(console.error);
+    approvalApi.getWorkflows().then(res => setTemplates(res.data)).catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -413,9 +417,12 @@ const SubmitFile = ({ onBack }) => {
     if (f) setFile(f);
   };
 
+  const availableTemplates = templates.filter(t => t.isActive && (!t.department || t.department._id === formData.departmentId || t.department === formData.departmentId));
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file) { setError('Please select a file to upload.'); return; }
+    if (useWorkflow && !selectedTemplateId) { setError('Please select a workflow template.'); return; }
     setSaving(true); setError(null);
     try {
       const data = new FormData();
@@ -424,6 +431,12 @@ const SubmitFile = ({ onBack }) => {
       data.append('departmentId', formData.departmentId);
       data.append('assignedTo', formData.assignedTo);
       data.append('useWorkflow', useWorkflow);
+      if (useWorkflow) {
+        data.append('workflowTemplateId', selectedTemplateId);
+        Object.entries(dynamicFields).forEach(([k, v]) => {
+          data.append(k, v);
+        });
+      }
       data.append('file', file);
       await approvalApi.submitFile(data);
       if (onBack) onBack();
@@ -505,6 +518,70 @@ const SubmitFile = ({ onBack }) => {
               : 'This file will be sent directly to the assigned approver for single-level sign-off.'}
           </p>
         </div>
+
+        {/* Workflow Template Selector */}
+        {useWorkflow && (
+          <div className="sf-field">
+            <label className="sf-label">Workflow Template <span>*</span></label>
+            <div className="sf-select-wrap">
+              <select
+                className="sf-select"
+                value={selectedTemplateId}
+                onChange={e => {
+                  setSelectedTemplateId(e.target.value);
+                  setDynamicFields({});
+                }}
+                required={useWorkflow}
+              >
+                <option value="">Select Workflow Template</option>
+                {availableTemplates.map(t => (
+                  <option key={t._id} value={t._id}>
+                    {t.name} ({t.stages?.length || 0} stages)
+                  </option>
+                ))}
+              </select>
+            </div>
+            {availableTemplates.length === 0 && formData.departmentId && (
+              <span style={{ fontSize: '0.72rem', color: '#fca5a5', marginTop: '0.3rem', display: 'block' }}>
+                No active templates found for this department. Create one in Workflow Configuration or turn off workflow routing.
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Dynamic Condition Fields */}
+        {useWorkflow && selectedTemplateId && (() => {
+          const selectedTemplate = templates.find(t => t._id === selectedTemplateId);
+          if (!selectedTemplate) return null;
+          const conditionFields = [];
+          selectedTemplate.stages.forEach(stage => {
+            if (stage.type === 'conditional' && stage.rules?.conditionField) {
+              conditionFields.push(stage.rules.conditionField);
+            }
+          });
+          const uniqueFields = [...new Set(conditionFields)];
+          if (uniqueFields.length === 0) return null;
+          return (
+            <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.2rem', borderRadius: '14px', border: '1px solid var(--border)', marginBottom: '1.5rem' }}>
+              <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--accent)', marginBottom: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Required Conditional Metadata</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {uniqueFields.map(field => (
+                  <div key={field}>
+                    <label className="sf-label">{field.charAt(0).toUpperCase() + field.slice(1)} <span>*</span></label>
+                    <input
+                      type="text"
+                      className="sf-input"
+                      placeholder={`Enter value for ${field}`}
+                      value={dynamicFields[field] || ''}
+                      onChange={e => setDynamicFields({ ...dynamicFields, [field]: e.target.value })}
+                      required
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Assign to */}
         <div className="sf-field">

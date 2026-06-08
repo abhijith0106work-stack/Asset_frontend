@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { QRCodeCanvas } from 'qrcode.react';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../config';
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 const STYLES = `
@@ -260,7 +260,9 @@ const Ico = ({ d, size = 14 }) => (
 const STATUS_CFG = {
   Available: { bg:'rgba(16,185,129,.12)',  border:'rgba(16,185,129,.3)',  text:'#34d399', dot:'#10b981', bar:'#10b981' },
   Assigned:  { bg:'rgba(99,102,241,.12)',  border:'rgba(99,102,241,.3)',  text:'#818cf8', dot:'#6366f1', bar:'#6366f1' },
+  'Under Maintenance': { bg:'rgba(245,158,11,.12)', border:'rgba(245,158,11,.3)', text:'#fbbf24', dot:'#f59e0b', bar:'#f59e0b' },
   Damaged:   { bg:'rgba(239,68,68,.12)',   border:'rgba(239,68,68,.3)',   text:'#fca5a5', dot:'#ef4444', bar:'#ef4444' },
+  Lost:      { bg:'rgba(244,63,94,.12)',    border:'rgba(244,63,94,.3)',    text:'#fda4af', dot:'#f43f5e', bar:'#f43f5e' },
   Retired:   { bg:'rgba(100,116,139,.12)', border:'rgba(100,116,139,.3)', text:'#94a3b8', dot:'#64748b', bar:'#64748b' },
 };
 
@@ -273,7 +275,8 @@ const BLANK_FORM = {
   name:'', type:'IT', status:'Available', assignedTo:'',
   macAddress:'', serialNumber:'', purchaseDate:'', model:'',
   subType:'', condition:'New', osVersion:'', softwareLicenses:'',
-  devicePassword:'', deviceUserName:'', deviceLocation:'', company:''
+  devicePassword:'', deviceUserName:'', deviceLocation:'', company:'',
+  brand:'', warrantyProvider:'', warrantyStartDate:'', warrantyExpiryDate:''
 };
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -291,6 +294,8 @@ const AssetsList = ({ role }) => {
   const [imageFile, setImageFile]       = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [saving, setSaving]             = useState(false);
+  const [selectedAssets, setSelectedAssets] = useState([]);
+  const [qrModal, setQrModal] = useState(null);
   const [editingId, setEditingId]       = useState(null);
   const imgRef = useRef();
   const isAdmin = role === 'Super Admin' || role === 'Admin';
@@ -357,7 +362,11 @@ const AssetsList = ({ role }) => {
       model: asset.model||'', subType: asset.subType||'', condition: asset.condition||'New',
       osVersion: asset.osVersion||'', softwareLicenses: asset.softwareLicenses||'',
       devicePassword: asset.devicePassword||'', deviceUserName: asset.deviceUserName||'',
-      deviceLocation: asset.deviceLocation||'', company: asset.company?._id||asset.company||''
+      deviceLocation: asset.deviceLocation||'', company: asset.company?._id||asset.company||'',
+      brand: asset.brand||'',
+      warrantyProvider: asset.warrantyProvider||'',
+      warrantyStartDate: asset.warrantyStartDate ? asset.warrantyStartDate.split('T')[0] : '',
+      warrantyExpiryDate: asset.warrantyExpiryDate ? asset.warrantyExpiryDate.split('T')[0] : ''
     });
     setImagePreview(asset.image ? `http://localhost:5000${asset.image}` : null);
     setImageFile(null); setIsModalOpen(true);
@@ -388,35 +397,46 @@ const AssetsList = ({ role }) => {
     } catch (err) { console.error(err); }
   };
 
-  const downloadLabel = (asset) => {
-    const qrCanvas = document.getElementById(`qr-${asset._id}`);
-    if (!qrCanvas) return;
-    const canvas = document.createElement('canvas');
-    canvas.width = 1050; canvas.height = 300;
-    const ctx = canvas.getContext('2d');
-    const draw = (logo = null) => {
-      ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0,0,canvas.width,canvas.height);
-      ctx.drawImage(qrCanvas, 30, 30, 240, 240);
-      if (logo) ctx.drawImage(logo, canvas.width-270, 30, 240, 240);
-      ctx.fillStyle = '#000'; ctx.font = 'bold 45px sans-serif';
-      ctx.fillText(asset.uniqueId ? `${asset.uniqueId} - ${asset.name}` : asset.name, 300, 80);
-      ctx.font = '28px sans-serif';
-      ctx.fillText(`Model: ${asset.model||'N/A'}`, 300, 130);
-      ctx.fillText(`SN: ${asset.serialNumber||'N/A'}`, 300, 175);
-      ctx.fillText(`Location: ${asset.deviceLocation||'N/A'}`, 300, 220);
-      ctx.fillText(`Company: ${asset.company?.name||'N/A'}`, 300, 265);
-      ctx.strokeStyle = '#000'; ctx.lineWidth = 4;
-      ctx.strokeRect(2,2,canvas.width-4,canvas.height-4);
+  const handleSelectAll = () => {
+    if (selectedAssets.length === filtered.length) setSelectedAssets([]);
+    else setSelectedAssets(filtered.map(a => a._id));
+  };
+
+  const handleSelect = (id) => {
+    setSelectedAssets(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
+  };
+
+  const handleBulkExport = async () => {
+    if (selectedAssets.length === 0) return alert('Select assets first');
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.post(`${API_BASE_URL}/assets/bulk-qr-export`, { assetIds: selectedAssets }, { 
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob' 
+      });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
       const link = document.createElement('a');
-      link.href = canvas.toDataURL('image/png');
-      link.download = `label-${asset.uniqueId||asset._id}.png`;
+      link.href = url;
+      link.setAttribute('download', 'Asset_QR_Labels.zip');
+      document.body.appendChild(link);
       link.click();
-    };
-    if (asset.company?.logo) {
-      const img = new Image(); img.crossOrigin = 'anonymous';
-      img.src = `http://localhost:5000${asset.company.logo}`;
-      img.onload = () => draw(img); img.onerror = () => draw();
-    } else { draw(); }
+    } catch (err) {
+      alert('Failed to generate bulk QR ZIP archive.');
+    }
+  };
+
+  const openQRModal = async (a) => {
+    setQrModal({ ...a, loading: true });
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.post(`${API_BASE_URL}/assets/${a._id}/generate-qr`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      setQrModal({ ...res.data, loading: false });
+      setAssets(prev => prev.map(item => item._id === a._id ? res.data : item));
+    } catch (err) {
+      console.error(err);
+      setQrModal(null);
+      alert('Failed: ' + (err.response?.data?.message || err.message));
+    }
   };
 
   const exportCSV = () => {
@@ -446,6 +466,11 @@ const AssetsList = ({ role }) => {
         </div>
         {isAdmin && (
           <div className="al-header-actions">
+            {selectedAssets.length > 0 && (
+              <button className="al-export-btn" onClick={handleBulkExport} style={{ borderColor: 'rgba(99,102,241,0.4)', color: '#818cf8' }}>
+                <Ico d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" size={14} /> Export Labels ({selectedAssets.length})
+              </button>
+            )}
             <button className="al-export-btn" onClick={exportCSV}>
               <Ico d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3" size={14} /> Export CSV
             </button>
@@ -485,12 +510,19 @@ const AssetsList = ({ role }) => {
         <table className="al-table">
           <thead>
             <tr>
+              {isAdmin && (
+                <th style={{ width: '40px' }}>
+                  <input type="checkbox" style={{ accentColor: '#6366f1', cursor: 'pointer' }}
+                    checked={selectedAssets.length === filtered.length && filtered.length > 0}
+                    onChange={handleSelectAll} />
+                </th>
+              )}
               <th>Asset</th>
               <th>Type</th>
               <th>Location</th>
               <th>Company</th>
               <th>Status</th>
-              {isAdmin && <th>Actions</th>}
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -524,6 +556,13 @@ const AssetsList = ({ role }) => {
                   const sc = STATUS_CFG[asset.status] || STATUS_CFG.Retired;
                   return (
                     <tr key={asset._id} style={{ animationDelay:`${i*.04}s` }}>
+                      {isAdmin && (
+                        <td>
+                          <input type="checkbox" style={{ accentColor: '#6366f1', cursor: 'pointer' }}
+                            checked={selectedAssets.includes(asset._id)}
+                            onChange={() => handleSelect(asset._id)} />
+                        </td>
+                      )}
                       <td>
                         <div className="al-asset-cell">
                           {asset.image
@@ -555,16 +594,12 @@ const AssetsList = ({ role }) => {
                             <button className="al-act-btn al-act-edit" onClick={() => handleEdit(asset)}>
                               <Ico d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7 M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" size={11} /> Edit
                             </button>
-                            <button className="al-act-btn al-act-label" onClick={() => downloadLabel(asset)}>
-                              <Ico d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" size={11} /> Label
+                            <button className="al-act-btn al-act-label" onClick={() => openQRModal(asset)}>
+                              <Ico d="M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h3 M14 21h3 M17 17h3v4 M20 14v3" size={11} /> Label
                             </button>
                             <button className="al-act-btn al-act-del" onClick={() => handleDelete(asset._id)}>
                               <Ico d="M3 6h18 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" size={11} /> Del
                             </button>
-                            {/* Hidden QR for label generation */}
-                            <div style={{ display:'none' }}>
-                              <QRCodeCanvas id={`qr-${asset._id}`} value={`http://localhost:3000/asset/${asset._id}`} size={256} />
-                            </div>
                           </div>
                         </td>
                       )}
@@ -682,6 +717,25 @@ const AssetsList = ({ role }) => {
                   </div>
                 </>
               )}
+              <div className="al-section-label">Warranty & Brand Details</div>
+              <div className="al-2col">
+                <div className="al-field">
+                  <label className="al-label">Brand</label>
+                  <input className="al-input" placeholder="e.g. Dell" value={formData.brand} onChange={e => set('brand', e.target.value)} />
+                </div>
+                <div className="al-field">
+                  <label className="al-label">Warranty Provider</label>
+                  <input className="al-input" placeholder="e.g. Dell Care" value={formData.warrantyProvider} onChange={e => set('warrantyProvider', e.target.value)} />
+                </div>
+                <div className="al-field">
+                  <label className="al-label">Warranty Start Date</label>
+                  <input className="al-input" type="date" value={formData.warrantyStartDate} onChange={e => set('warrantyStartDate', e.target.value)} />
+                </div>
+                <div className="al-field">
+                  <label className="al-label">Warranty Expiry Date</label>
+                  <input className="al-input" type="date" value={formData.warrantyExpiryDate} onChange={e => set('warrantyExpiryDate', e.target.value)} />
+                </div>
+              </div>
 
               <div className="al-section-label">Image</div>
               <div className={`al-img-zone${imagePreview ? ' has-img' : ''}`} onClick={() => imgRef.current?.click()}>
