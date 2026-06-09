@@ -264,10 +264,10 @@ const Icon = ({ d, size = 14 }) => (
   </svg>
 );
 
-const STATUS_BAR = { submitted: '#6366f1', under_review: '#f59e0b', resubmitted: '#06b6d4' };
-const STATUS_ICON_BG = { submitted: 'rgba(99,102,241,.15)', under_review: 'rgba(245,158,11,.12)', resubmitted: 'rgba(6,182,212,.12)' };
+const STATUS_BAR = { submitted: '#6366f1', in_review: '#f59e0b', resubmitted: '#06b6d4' };
+const STATUS_ICON_BG = { submitted: 'rgba(99,102,241,.15)', in_review: 'rgba(245,158,11,.12)', resubmitted: 'rgba(6,182,212,.12)' };
 
-const FILTERS = ['all', 'submitted', 'under_review', 'resubmitted'];
+const FILTERS = ['all', 'submitted', 'in_review', 'resubmitted'];
 
 const SkeletonCard = ({ delay }) => (
   <div className="pa-skel-card" style={{ animationDelay: delay }}>
@@ -301,7 +301,7 @@ const PendingActions = () => {
     try {
       const res = await approvalApi.getFiles();
       setFiles(res.data.filter(f =>
-        ['submitted', 'under_review', 'resubmitted'].includes(f.status)
+        ['submitted', 'in_review', 'resubmitted'].includes(f.status)
       ));
     } catch (err) { console.error(err); }
     finally { setLoading(false); }

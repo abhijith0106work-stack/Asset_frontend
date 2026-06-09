@@ -21,7 +21,7 @@ const Reports = () => {
         total: data.length,
         approved: data.filter(f => f.status === 'approved').length,
         rejected: data.filter(f => f.status === 'rejected').length,
-        pending: data.filter(f => f.status === 'submitted' || f.status === 'under_review').length,
+        pending: data.filter(f => f.status === 'submitted' || f.status === 'in_review').length,
       });
     } catch (err) {
       console.error(err);
@@ -32,11 +32,11 @@ const Reports = () => {
 
   const handleExport = () => {
     const exportData = files.map(f => ({
-      'File Name': f.originalName,
-      'Submitted By': f.submitter?.name || 'Unknown',
+      'File Name': f.title,
+      'Submitted By': f.submittedBy?.name || 'Unknown',
       'Status': f.status.toUpperCase(),
-      'Current Step': f.currentStepIndex + 1,
-      'Department': f.department?.name || 'N/A',
+      'Current Step': f.currentStageIndex !== undefined ? f.currentStageIndex + 1 : f.currentLevel,
+      'Department': f.departmentId?.name || 'N/A',
       'Created At': new Date(f.createdAt).toLocaleString(),
       'Updated At': new Date(f.updatedAt).toLocaleString(),
     }));
@@ -130,9 +130,9 @@ const Reports = () => {
             <tbody>
               {files.slice(0, 10).map(f => (
                 <tr key={f._id}>
-                  <td style={{ color: '#f1f5f9', fontWeight: 500 }}>{f.originalName}</td>
-                  <td>{f.submitter?.name}</td>
-                  <td>{f.department?.name || '—'}</td>
+                  <td style={{ color: '#f1f5f9', fontWeight: 500 }}>{f.title}</td>
+                  <td>{f.submittedBy?.name}</td>
+                  <td>{f.departmentId?.name || '—'}</td>
                   <td>
                     <span className={`status-badge status-${f.status === 'approved' ? 'approved' : f.status === 'rejected' ? 'rejected' : 'pending'}`}>
                       {f.status.replace('_', ' ')}

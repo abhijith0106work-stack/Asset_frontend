@@ -71,16 +71,11 @@ const STYLES = `
     overflow: hidden;
   }
   .fd-root::before {
-    content:'';
-    position:fixed; inset:0;
-    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events:none; z-index:0;
+    display: none;
   }
   .fd-orb {
-    position:fixed; border-radius:50%; filter:blur(90px); pointer-events:none; z-index:0;
+    display: none;
   }
-  .fd-orb-1 { width:480px;height:480px;background:rgba(99,102,241,.11);top:-120px;right:-80px; }
-  .fd-orb-2 { width:320px;height:320px;background:rgba(16,185,129,.07);bottom:40px;left:-60px; }
 
   .fd-inner { position:relative; z-index:1; max-width:900px; }
 
@@ -133,7 +128,7 @@ const STYLES = `
     letter-spacing:.03em; text-transform:uppercase;
   }
   .fd-badge-status-submitted    { background:rgba(99,102,241,.18); color:#818cf8; border:1px solid rgba(99,102,241,.3); }
-  .fd-badge-status-under_review { background:rgba(245,158,11,.15); color:#fbbf24; border:1px solid rgba(245,158,11,.3); }
+  .fd-badge-status-in_review { background:rgba(245,158,11,.15); color:#fbbf24; border:1px solid rgba(245,158,11,.3); }
   .fd-badge-status-approved     { background:rgba(16,185,129,.15); color:#34d399; border:1px solid rgba(16,185,129,.3); }
   .fd-badge-status-rejected     { background:rgba(239,68,68,.15);  color:#f87171; border:1px solid rgba(239,68,68,.3); }
   .fd-badge-level {
@@ -266,7 +261,7 @@ const Icon = ({ d, size = 14 }) => (
 
 const STATUS_DOT = {
   submitted:    'fd-tl-dot-submitted',
-  under_review: 'fd-tl-dot-review',
+  in_review: 'fd-tl-dot-review',
   approved:     'fd-tl-dot-approved',
   rejected:     'fd-tl-dot-rejected',
 };
@@ -297,7 +292,6 @@ const FileDetail = () => {
 
   if (loading) return (
     <div className="fd-root">
-      <div className="fd-orb fd-orb-1" /><div className="fd-orb fd-orb-2" />
       <div className="fd-inner">
         <div className="fd-loading-wrap">
           <div className="fd-loading-dots"><span/><span/><span/></div>
@@ -317,7 +311,6 @@ const FileDetail = () => {
 
   return (
     <div className="fd-root">
-      <div className="fd-orb fd-orb-1" /><div className="fd-orb fd-orb-2" />
       <div className="fd-inner">
 
         {/* Back */}
@@ -425,7 +418,7 @@ const FileDetail = () => {
                 <div className="fd-tl-event">
                   {entry.action === 'approved' ? 'Approved' :
                    entry.action === 'rejected' ? 'Rejected' :
-                   entry.action === 'under_review' ? 'Moved to Review' : entry.action}
+                   entry.action === 'in_review' ? 'Moved to Review' : entry.action}
                   {entry.level && <span style={{ color:'#475569', fontWeight:400 }}> — Level {entry.level}</span>}
                 </div>
                 <div className="fd-tl-meta">

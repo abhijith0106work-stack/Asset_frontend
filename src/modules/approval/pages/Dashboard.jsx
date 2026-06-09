@@ -50,24 +50,13 @@ const STYLES = `
 
   /* subtle noise overlay */
   .ap-root::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 0;
+    display: none;
   }
 
   /* glowing orbs */
   .ap-orb {
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(90px);
-    pointer-events: none;
-    z-index: 0;
+    display: none;
   }
-  .ap-orb-1 { width: 500px; height: 500px; background: var(--accent-glow); top: -150px; right: -100px; opacity: 0.5; }
-  .ap-orb-2 { width: 350px; height: 350px; background: var(--accent-glow); bottom: 50px; left: -80px; opacity: 0.3; }
 
   .ap-inner { position: relative; z-index: 1; }
 
@@ -350,7 +339,7 @@ const ApprovalDashboard = () => {
         const files = wfRes.data;
         setStats({
           total:    files.length,
-          pending:  files.filter(f => f.status === 'submitted' || f.status === 'under_review').length,
+          pending:  files.filter(f => f.status === 'submitted' || f.status === 'in_review').length,
           approved: files.filter(f => f.status === 'approved').length,
           rejected: files.filter(f => f.status === 'rejected').length,
         });
@@ -370,8 +359,6 @@ const ApprovalDashboard = () => {
 
   return (
     <div className="ap-root">
-      <div className="ap-orb ap-orb-1" />
-      <div className="ap-orb ap-orb-2" />
 
       <div className="ap-inner">
         {/* Header */}

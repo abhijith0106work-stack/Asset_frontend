@@ -518,12 +518,12 @@ const TicketsList = ({ role, onTicketCreated }) => {
   };
 
   const getStatusOpts = (ticket) => {
-    const isAssignee = (ticket.assignedTo?._id||ticket.assignedTo) === currentUser._id;
+    const isAssignee = (ticket.assignedTo?._id||ticket.assignedTo) === currentUser._id ||
+                       (ticket.assignedDepartment?._id||ticket.assignedDepartment) === currentUser.department?._id;
     const isCreator  = (ticket.createdBy?._id||ticket.createdBy) === currentUser._id;
     
-    if (isSuperAdmin || isOpsAdmin) return ['Open','In Progress','Need Clarification','Done','Closed'];
-    if (isAssignee) return ['In Progress','Not Possible','Need Clarification','Pending Approval'];
-    if (isCreator) return [ticket.status, 'Pending Approval'];
+    if (isSuperAdmin || isOpsAdmin) return ['Open', 'Assigned', 'In Progress', 'Need Clarification', 'Pending Approval', 'Not Possible', 'Done', 'Closed'];
+    if (isAssignee) return [ticket.status, 'In Progress', 'Need Clarification', 'Pending Approval', 'Not Possible'];
     return [ticket.status];
   };
 
