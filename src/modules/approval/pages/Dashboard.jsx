@@ -1,105 +1,7 @@
-// import React, { useState, useEffect } from 'react';
-// import { approvalApi } from '../api/approvalApi';
-
-// import MyFiles from './MyFiles';
-// import PendingActions from './PendingActions';
-// import SubmitFile from './SubmitFile';
-// import Departments from './admin/Departments';
-// import Workflows from './admin/Workflows';
-// import Reports from './admin/Reports';
-
-// const ApprovalDashboard = () => {
-//   const user = JSON.parse(localStorage.getItem('user'));
-//   const isAdmin = user?.role === 'Super Admin' || user?.role === 'Admin';
-//   const [activeSubView, setActiveSubView] = useState('overview');
-//   const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0, rejected: 0 });
-//   const [loading, setLoading] = useState(true);
-
-//   useEffect(() => {
-//     const fetchStats = async () => {
-//       try {
-//         const res = await approvalApi.getFiles();
-//         const files = res.data;
-//         setStats({
-//           total: files.length,
-//           pending: files.filter(f => f.status === 'submitted' || f.status === 'under_review').length,
-//           approved: files.filter(f => f.status === 'approved').length,
-//           rejected: files.filter(f => f.status === 'rejected').length,
-//         });
-//       } catch (err) { console.error(err); }
-//       finally { setLoading(false); }
-//     };
-//     fetchStats();
-//   }, []);
-
-//   return (
-//     <div className="ap-dash-root" style={{ padding: '2rem', fontFamily: 'DM Sans, sans-serif', color: 'white' }}>
-//       <div style={{ display: 'flex', justify: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-//         <h2 style={{ fontSize: '1.8rem', fontWeight: 700 }}>File Approval Module</h2>
-//         <div style={{ display: 'flex', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', padding: '0.3rem', borderRadius: '12px' }}>
-//           {['overview', 'my-files', 'pending', ...(isAdmin ? ['departments', 'workflows', 'reports'] : [])].map(v => (
-//             <button 
-//               key={v}
-//               onClick={() => setActiveSubView(v)}
-//               style={{ 
-//                 padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', cursor: 'pointer',
-//                 background: activeSubView === v ? '#6366f1' : 'transparent',
-//                 color: activeSubView === v ? 'white' : '#94a3b8',
-//                 fontWeight: 600, fontSize: '0.85rem'
-//               }}
-//             >
-//               {v.charAt(0).toUpperCase() + v.slice(1).replace('-', ' ')}
-//             </button>
-//           ))}
-//         </div>
-//       </div>
-      
-//       {activeSubView === 'overview' && (
-//         <>
-//           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
-//             {[
-//               { label: 'Total Files', value: stats.total, color: '#6366f1' },
-//               { label: 'Pending Approval', value: stats.pending, color: '#f59e0b' },
-//               { label: 'Approved', value: stats.approved, color: '#10b981' },
-//               { label: 'Rejected', value: stats.rejected, color: '#ef4444' },
-//             ].map(card => (
-//               <div key={card.label} style={{ 
-//                 background: 'rgba(255,255,255,0.03)', 
-//                 padding: '1.5rem', 
-//                 borderRadius: '20px', 
-//                 border: '1px solid rgba(255,255,255,0.08)',
-//                 textAlign: 'center'
-//               }}>
-//                 <div style={{ fontSize: '0.9rem', color: '#94a3b8', marginBottom: '0.5rem' }}>{card.label}</div>
-//                 <div style={{ fontSize: '2.5rem', fontWeight: 800, color: card.color }}>{loading ? '...' : card.value}</div>
-//               </div>
-//             ))}
-//           </div>
-
-//           <div style={{ marginTop: '3rem' }}>
-//             <h3 style={{ marginBottom: '1.5rem' }}>Recent Activity</h3>
-//             <div style={{ background: 'rgba(255,255,255,0.02)', padding: '2rem', borderRadius: '24px', textAlign: 'center', color: '#64748b' }}>
-//                No recent movements found.
-//             </div>
-//           </div>
-//         </>
-//       )}
-
-//       {activeSubView === 'my-files' && <MyFiles onNewClick={() => setActiveSubView('submit')} />}
-//       {activeSubView === 'pending' && <PendingActions />}
-//       {activeSubView === 'submit' && <SubmitFile onBack={() => setActiveSubView('my-files')} />}
-//       {activeSubView === 'departments' && <Departments />}
-//       {activeSubView === 'workflows' && <Workflows />}
-//       {activeSubView === 'reports' && <Reports />}
-//     </div>
-//   );
-// };
-
-// export default ApprovalDashboard;
-
-
 import React, { useState, useEffect } from 'react';
 import { approvalApi } from '../api/approvalApi';
+import axios from 'axios';
+import { API_BASE_URL } from '../../../config';
 
 import MyFiles from './MyFiles';
 import PendingActions from './PendingActions';
@@ -107,6 +9,7 @@ import SubmitFile from './SubmitFile';
 import Departments from './admin/Departments';
 import Workflows from './admin/Workflows';
 import Reports from './admin/Reports';
+import CommonRepository from './CommonRepository';
 
 // ── Inject keyframes & font once ──────────────────────────────────────────────
 const STYLES = `
@@ -147,24 +50,13 @@ const STYLES = `
 
   /* subtle noise overlay */
   .ap-root::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 0;
+    display: none;
   }
 
   /* glowing orbs */
   .ap-orb {
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(90px);
-    pointer-events: none;
-    z-index: 0;
+    display: none;
   }
-  .ap-orb-1 { width: 500px; height: 500px; background: var(--accent-glow); top: -150px; right: -100px; opacity: 0.5; }
-  .ap-orb-2 { width: 350px; height: 350px; background: var(--accent-glow); bottom: 50px; left: -80px; opacity: 0.3; }
 
   .ap-inner { position: relative; z-index: 1; }
 
@@ -426,6 +318,7 @@ const ApprovalDashboard = () => {
   const isAdmin = user?.role === 'Super Admin' || user?.role === 'Admin';
   const [activeSubView, setActiveSubView] = useState('overview');
   const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0, rejected: 0 });
+  const [commonCount, setCommonCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -438,14 +331,19 @@ const ApprovalDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await approvalApi.getFiles();
-        const files = res.data;
+        const token = localStorage.getItem('token');
+        const [wfRes, commonRes] = await Promise.all([
+          approvalApi.getFiles(),
+          axios.get(`${API_BASE_URL}/common-files`, { headers: { Authorization: `Bearer ${token}` } })
+        ]);
+        const files = wfRes.data;
         setStats({
           total:    files.length,
-          pending:  files.filter(f => f.status === 'submitted' || f.status === 'under_review').length,
+          pending:  files.filter(f => f.status === 'submitted' || f.status === 'in_review').length,
           approved: files.filter(f => f.status === 'approved').length,
           rejected: files.filter(f => f.status === 'rejected').length,
         });
+        setCommonCount(commonRes.data.length);
       } catch (err) { console.error(err); }
       finally { setLoading(false); }
     };
@@ -453,16 +351,14 @@ const ApprovalDashboard = () => {
   }, []);
 
   const navItems = [
-    'overview', 'my-files', 'pending',
+    'overview', 'my-files', 'pending', 'common-repository',
     ...(isAdmin ? ['departments', 'workflows', 'reports'] : []),
   ];
 
-  const label = v => v.charAt(0).toUpperCase() + v.slice(1).replace('-', ' ');
+  const label = v => v.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 
   return (
     <div className="ap-root">
-      <div className="ap-orb ap-orb-1" />
-      <div className="ap-orb ap-orb-2" />
 
       <div className="ap-inner">
         {/* Header */}
@@ -494,6 +390,7 @@ const ApprovalDashboard = () => {
               <StatCard label="Pending Approval" value={stats.pending}  color="#f59e0b" icon={ICONS.pending} sub="Awaiting review"           delay="0.1s"  loading={loading} />
               <StatCard label="Approved"         value={stats.approved} color="#10b981" icon={ICONS.check}   sub="Successfully cleared"      delay="0.15s" loading={loading} />
               <StatCard label="Rejected"         value={stats.rejected} color="#ef4444" icon={ICONS.x}       sub="Returned for revision"    delay="0.2s"  loading={loading} />
+              <StatCard label="Shared Documents" value={commonCount}    color="#8b5cf6" icon={ICONS.files}   sub="Common shared library"     delay="0.25s" loading={loading} />
             </div>
 
             {/* Quick actions */}
@@ -506,6 +403,9 @@ const ApprovalDashboard = () => {
               </button>
               <button className="ap-quick-btn" onClick={() => setActiveSubView('pending')}>
                 <Icon d={ICONS.eye} size={15} /> Pending Actions
+              </button>
+              <button className="ap-quick-btn" onClick={() => setActiveSubView('common-repository')}>
+                📁 Shared Documents
               </button>
             </div>
 
@@ -526,6 +426,7 @@ const ApprovalDashboard = () => {
         {activeSubView === 'departments' && <Departments />}
         {activeSubView === 'workflows'   && <Workflows />}
         {activeSubView === 'reports'     && <Reports />}
+        {activeSubView === 'common-repository' && <CommonRepository />}
       </div>
     </div>
   );

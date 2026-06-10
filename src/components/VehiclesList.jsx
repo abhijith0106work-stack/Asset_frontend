@@ -1,339 +1,5 @@
-// import React, { useState, useEffect } from 'react';
-// import axios from 'axios';
-// import { QRCodeSVG } from 'qrcode.react';
-// import { API_BASE_URL } from '../config';
-
-// const STATUS_COLORS = {
-//   'Available':      { bg: 'rgba(16,185,129,0.1)',   text: '#10b981', dot: '#10b981' },
-//   'In Use':         { bg: 'rgba(99,102,241,0.1)',  text: '#818cf8', dot: '#6366f1' },
-//   'Maintenance':    { bg: 'rgba(245,158,11,0.1)',  text: '#f59e0b', dot: '#f59e0b' },
-//   'Out of Service': { bg: 'rgba(239,68,68,0.1)',   text: '#fca5a5', dot: '#ef4444' },
-// };
-
-// const VehiclesList = ({ role }) => {
-//   const [vehicles, setVehicles] = useState([]);
-//   const [companies, setCompanies] = useState([]);
-//   const [users, setUsers] = useState([]);
-//   const [isModalOpen, setIsModalOpen] = useState(false);
-//   const [editingId, setEditingId] = useState(null);
-//   const [loading, setLoading] = useState(true);
-//   const [saving, setSaving] = useState(false);
-  
-//   const [formData, setFormData] = useState({
-//     make: '', model: '', plateNumber: '', year: new Date().getFullYear(),
-//     color: '', vin: '', company: '', assignedTo: '', status: 'Available'
-//   });
-
-//   const [qrModal, setQrModal] = useState(null); // Stores vehicle for QR view
-
-//   const isAdmin = role === 'Super Admin' || role === 'Admin';
-//   const isSuperAdmin = role === 'Super Admin';
-
-//   useEffect(() => {
-//     fetchVehicles();
-//     if (isAdmin) {
-//       fetchCompanies();
-//       fetchUsers();
-//     }
-//   }, []);
-
-//   const fetchVehicles = async () => {
-//     try {
-//       const token = localStorage.getItem('token');
-//       const user = JSON.parse(localStorage.getItem('user'));
-//       let url = `${API_BASE_URL}/vehicles`;
-      
-//       // If regular user, they might only see assigned vehicles or all if permitted
-//       if (!isAdmin) url = `${API_BASE_URL}/vehicles/me`;
-
-//       const res = await axios.get(url, {
-//         headers: { Authorization: `Bearer ${token}` }
-//       });
-//       setVehicles(res.data);
-//     } catch (err) {
-//       console.error('Failed to fetch vehicles', err);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const fetchCompanies = async () => {
-//     try {
-//       const token = localStorage.getItem('token');
-//       const res = await axios.get(`${API_BASE_URL}/companies`, {
-//         headers: { Authorization: `Bearer ${token}` }
-//       });
-//       setCompanies(res.data);
-//     } catch (err) { console.error(err); }
-//   };
-
-//   const fetchUsers = async () => {
-//     try {
-//       const token = localStorage.getItem('token');
-//       const res = await axios.get(`${API_BASE_URL}/users`, {
-//         headers: { Authorization: `Bearer ${token}` }
-//       });
-//       setUsers(res.data);
-//     } catch (err) { console.error(err); }
-//   };
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     setSaving(true);
-//     try {
-//       const token = localStorage.getItem('token');
-//       const data = { 
-//         ...formData,
-//         year: formData.year ? Number(formData.year) : undefined
-//       };
-//       if (data.assignedTo === '') data.assignedTo = null;
-//       if (!data.company) throw new Error('Please select a company');
-
-//       if (editingId) {
-//         await axios.put(`${API_BASE_URL}/vehicles/${editingId}`, data, {
-//           headers: { Authorization: `Bearer ${token}` }
-//         });
-//       } else {
-//         await axios.post(`${API_BASE_URL}/vehicles`, data, {
-//           headers: { Authorization: `Bearer ${token}` }
-//         });
-//       }
-//       setIsModalOpen(false);
-//       fetchVehicles();
-//     } catch (err) {
-//       console.error(err);
-//       alert(err.response?.data?.message || err.message || 'Error saving vehicle');
-//     } finally {
-//       setSaving(false);
-//     }
-//   };
-
-//   const openAdd = () => {
-//     const user = JSON.parse(localStorage.getItem('user'));
-//     setFormData({
-//       make: '', model: '', plateNumber: '', year: new Date().getFullYear(),
-//       color: '', vin: '', company: user?.company || '', assignedTo: '', status: 'Available'
-//     });
-//     setEditingId(null);
-//     setIsModalOpen(true);
-//   };
-
-//   const openEdit = (v) => {
-//     setFormData({
-//       make: v.make,
-//       model: v.model,
-//       plateNumber: v.plateNumber,
-//       year: v.year,
-//       color: v.color || '',
-//       vin: v.vin || '',
-//       company: v.company?._id || v.company || '',
-//       assignedTo: v.assignedTo?._id || v.assignedTo || '',
-//       status: v.status
-//     });
-//     setEditingId(v._id);
-//     setIsModalOpen(true);
-//   };
-
-//   const handleDelete = async (id) => {
-//     if (!window.confirm('Are you sure you want to delete this vehicle?')) return;
-//     try {
-//       const token = localStorage.getItem('token');
-//       await axios.delete(`${API_BASE_URL}/vehicles/${id}`, {
-//         headers: { Authorization: `Bearer ${token}` }
-//       });
-//       fetchVehicles();
-//     } catch (err) { console.error(err); }
-//   };
-
-//   const downloadQR = (id, plate) => {
-//     const svg = document.getElementById(id);
-//     const xml = new XMLSerializer().serializeToString(svg);
-//     const svg64 = btoa(xml);
-//     const b64Start = 'data:image/svg+xml;base64,';
-//     const image64 = b64Start + svg64;
-//     const link = document.createElement('a');
-//     link.href = image64;
-//     link.download = `QR_${plate}.svg`;
-//     link.click();
-//   };
-
-//   if (loading) return <div style={{ color: '#94a3b8', padding: '2rem' }}>Loading vehicles...</div>;
-
-//   return (
-//     <div className="vh-root">
-//       <style>{`
-//         .vh-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-//         .vh-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
-//         .vh-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 1.5rem; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; }
-//         .vh-card:hover { transform: translateY(-5px); border-color: rgba(99,102,241,0.3); background: rgba(255,255,255,0.05); }
-        
-//         .vh-plate { font-family: 'DM Mono', monospace; background: #1e293b; color: #f1f5f9; padding: 0.25rem 0.75rem; border-radius: 6px; font-weight: 600; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.1); width: fit-content; margin-bottom: 1rem; }
-//         .vh-name { font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.25rem; }
-//         .vh-meta { font-size: 0.85rem; color: #94a3b8; margin-bottom: 1rem; }
-        
-//         .vh-status { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; margin-bottom: 1.2rem; }
-//         .vh-info-row { display: flex; justify-content: space-between; font-size: 0.8rem; color: #64748b; margin-bottom: 0.5rem; }
-//         .vh-info-val { color: #cbd5e1; font-weight: 500; }
-        
-//         .vh-footer { display: flex; gap: 0.5rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06); }
-//         .vh-btn { flex: 1; padding: 0.5rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: #cbd5e1; cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: all 0.2s; }
-//         .vh-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); }
-//         .vh-btn-primary { background: rgba(99,102,241,0.1); border-color: rgba(99,102,241,0.2); color: #818cf8; }
-//         .vh-btn-primary:hover { background: rgba(99,102,241,0.2); }
-        
-//         .vh-add-btn { background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; border: none; padding: 0.7rem 1.4rem; border-radius: 12px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 15px rgba(99,102,241,0.3); }
-        
-//         .vh-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justifyContent: center; z-index: 1000; padding: 1rem; }
-//         .vh-modal { background: #0f172a; width: 500px; padding: 2rem; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); max-height: 90vh; overflow-y: auto; }
-//         .vh-input-group { margin-bottom: 1.25rem; }
-//         .vh-label { display: block; color: #94a3b8; font-size: 0.8rem; margin-bottom: 0.4rem; font-weight: 500; }
-//         .vh-input, .vh-select { width: 100%; background: #1e293b; border: 1px solid rgba(255,255,255,0.1); padding: 0.8rem; color: white; border-radius: 12px; outline: none; transition: border-color 0.2s; }
-//         .vh-select option { background: #0f172a; color: white; }
-//         .vh-input:focus { border-color: #6366f1; }
-//       `}</style>
-
-//       <div className="vh-header">
-//         <div>
-//           <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'white' }}>Vehicles Registry</h2>
-//           <p style={{ color: '#64748b', fontSize: '0.9rem' }}>Manage company fleet and vehicle assignments</p>
-//         </div>
-//         {isAdmin && <button className="vh-add-btn" onClick={openAdd}>+ Add Vehicle</button>}
-//       </div>
-
-//       <div className="vh-grid">
-//         {vehicles.map(v => {
-//           const sc = STATUS_COLORS[v.status] || STATUS_COLORS['Available'];
-//           return (
-//             <div key={v._id} className="vh-card">
-//               <div className="vh-plate">{v.plateNumber}</div>
-//               <h3 className="vh-name">{v.make} {v.model}</h3>
-//               <div className="vh-meta">{v.year} • {v.color || 'N/A'}</div>
-              
-//               <div className="vh-status" style={{ background: sc.bg, color: sc.text }}>
-//                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: sc.dot }} />
-//                 {v.status}
-//               </div>
-
-//               <div className="vh-info-row">
-//                 <span>Company</span>
-//                 <span className="vh-info-val">{v.company?.name || 'N/A'}</span>
-//               </div>
-//               <div className="vh-info-row">
-//                 <span>Assigned To</span>
-//                 <span className="vh-info-val">{v.assignedTo?.name || 'Unassigned'}</span>
-//               </div>
-
-//               <div className="vh-footer">
-//                 <button className="vh-btn vh-btn-primary" onClick={() => setQrModal(v)}>QR Code</button>
-//                 {isAdmin && <button className="vh-btn" onClick={() => openEdit(v)}>Edit</button>}
-//                 {isSuperAdmin && <button className="vh-btn" style={{ color: '#fca5a5' }} onClick={() => handleDelete(v._id)}>Delete</button>}
-//               </div>
-//             </div>
-//           );
-//         })}
-//       </div>
-
-//       {isModalOpen && (
-//         <div className="vh-modal-overlay">
-//           <div className="vh-modal">
-//             <h3 style={{ marginBottom: '1.5rem', color: 'white', fontSize: '1.5rem' }}>{editingId ? 'Edit Vehicle' : 'Register Vehicle'}</h3>
-//             <form onSubmit={handleSubmit}>
-//               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-//                 <div className="vh-input-group">
-//                   <label className="vh-label">Make</label>
-//                   <input className="vh-input" value={formData.make} onChange={e => setFormData({...formData, make: e.target.value})} required placeholder="e.g. Toyota" />
-//                 </div>
-//                 <div className="vh-input-group">
-//                   <label className="vh-label">Model</label>
-//                   <input className="vh-input" value={formData.model} onChange={e => setFormData({...formData, model: e.target.value})} required placeholder="e.g. Camry" />
-//                 </div>
-//               </div>
-
-//               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-//                 <div className="vh-input-group">
-//                   <label className="vh-label">Plate Number</label>
-//                   <input className="vh-input" value={formData.plateNumber} onChange={e => setFormData({...formData, plateNumber: e.target.value})} required placeholder="e.g. ABC-1234" />
-//                 </div>
-//                 <div className="vh-input-group">
-//                   <label className="vh-label">Year</label>
-//                   <input className="vh-input" type="number" value={formData.year} onChange={e => setFormData({...formData, year: e.target.value})} />
-//                 </div>
-//               </div>
-
-//               <div className="vh-input-group">
-//                 <label className="vh-label">VIN (Optional)</label>
-//                 <input className="vh-input" value={formData.vin} onChange={e => setFormData({...formData, vin: e.target.value})} placeholder="Vehicle Identification Number" />
-//               </div>
-
-//               <div className="vh-input-group">
-//                 <label className="vh-label">Company</label>
-//                 <select className="vh-select" value={formData.company} onChange={e => setFormData({...formData, company: e.target.value})} required>
-//                   <option value="">Select Company</option>
-//                   {companies.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
-//                 </select>
-//                 {companies.length === 0 && <p style={{ color: '#fca5a5', fontSize: '0.7rem', marginTop: '0.4rem' }}>⚠️ No companies found. Please create one first.</p>}
-//               </div>
-
-//               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-//                 <div className="vh-input-group">
-//                   <label className="vh-label">Status</label>
-//                   <select className="vh-select" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
-//                     <option value="Available">Available</option>
-//                     <option value="In Use">In Use</option>
-//                     <option value="Maintenance">Maintenance</option>
-//                     <option value="Out of Service">Out of Service</option>
-//                   </select>
-//                 </div>
-//                 <div className="vh-input-group">
-//                   <label className="vh-label">Assign To</label>
-//                   <select className="vh-select" value={formData.assignedTo} onChange={e => setFormData({...formData, assignedTo: e.target.value})}>
-//                     <option value="">Unassigned</option>
-//                     {users.map(u => <option key={u._id} value={u._id}>{u.name}</option>)}
-//                   </select>
-//                 </div>
-//               </div>
-
-//               <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-//                 <button type="button" className="vh-btn" onClick={() => setIsModalOpen(false)} style={{ flex: 1, padding: '0.8rem' }}>Cancel</button>
-//                 <button type="submit" className="vh-add-btn" style={{ flex: 1 }}>{saving ? 'Saving...' : editingId ? 'Update' : 'Register'}</button>
-//               </div>
-//             </form>
-//           </div>
-//         </div>
-//       )}
-
-//       {qrModal && (
-//         <div className="vh-modal-overlay">
-//           <div className="vh-modal" style={{ width: '350px', textAlign: 'center' }}>
-//             <h3 style={{ color: 'white', marginBottom: '1.5rem' }}>Vehicle QR Code</h3>
-//             <div style={{ background: 'white', padding: '1.5rem', borderRadius: '16px', display: 'inline-block', marginBottom: '1.5rem' }}>
-//               <QRCodeSVG 
-//                 id={`qr-${qrModal._id}`}
-//                 value={JSON.stringify({ type: 'vehicle', id: qrModal._id, plate: qrModal.plateNumber })}
-//                 size={200}
-//                 level="H"
-//                 includeMargin={true}
-//               />
-//             </div>
-//             <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-//               <strong>{qrModal.plateNumber}</strong><br/>
-//               {qrModal.make} {qrModal.model}
-//             </p>
-//             <div style={{ display: 'flex', gap: '1rem' }}>
-//               <button className="vh-btn" onClick={() => setQrModal(null)}>Close</button>
-//               <button className="vh-add-btn" style={{ flex: 1 }} onClick={() => downloadQR(`qr-${qrModal._id}`, qrModal.plateNumber)}>Download SVG</button>
-//             </div>
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default VehiclesList;
-
-
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { QRCodeSVG } from 'qrcode.react';
 import { API_BASE_URL } from '../config';
@@ -590,6 +256,7 @@ const SkeletonCard = ({ delay }) => (
 
 // ── Component ─────────────────────────────────────────────────────────────────
 const VehiclesList = ({ role }) => {
+  const navigate = useNavigate();
   const [vehicles, setVehicles]   = useState([]);
   const [companies, setCompanies] = useState([]);
   const [users, setUsers]         = useState([]);
@@ -598,6 +265,58 @@ const VehiclesList = ({ role }) => {
   const [loading, setLoading]     = useState(true);
   const [saving, setSaving]       = useState(false);
   const [qrModal, setQrModal]     = useState(null);
+  const [qrLoading, setQrLoading] = useState(false);
+  const [selectedVehicles, setSelectedVehicles] = useState([]);
+  const [bulkGenerating, setBulkGenerating] = useState(false);
+
+  const handleSelect = (id) => {
+    setSelectedVehicles(prev => prev.includes(id) ? prev.filter(v => v !== id) : [...prev, id]);
+  };
+
+  const handleSelectAll = () => {
+    if (selectedVehicles.length === vehicles.length) setSelectedVehicles([]);
+    else setSelectedVehicles(vehicles.map(v => v._id));
+  };
+
+  const openQRModal = async (v) => {
+    setQrModal({ ...v, loading: true });
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.post(`${API_BASE_URL}/vehicles/${v._id}/generate-qr`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      setQrModal({ ...res.data, loading: false });
+      // Update local vehicle state with the new image URLs
+      setVehicles(prev => prev.map(item => item._id === v._id ? res.data : item));
+    } catch (err) {
+      console.error(err);
+      setQrModal(null);
+      alert('Failed: ' + (err.response?.data?.message || err.message));
+    }
+  };
+
+  const handleBulkExport = async () => {
+    if (selectedVehicles.length === 0) return alert('Select at least one vehicle for bulk export.');
+    setBulkGenerating(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.post(`${API_BASE_URL}/vehicles/bulk-qr-export`, { vehicleIds: selectedVehicles }, { 
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob' 
+      });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'Vehicle_QR_Labels.zip');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setSelectedVehicles([]);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to generate bulk QR ZIP archive.');
+    } finally {
+      setBulkGenerating(false);
+    }
+  };
 
   const [formData, setFormData] = useState({
     make:'', model:'', plateNumber:'', year: new Date().getFullYear(),
@@ -704,6 +423,17 @@ const VehiclesList = ({ role }) => {
           <p className="vh-sub">Manage company fleet and vehicle assignments</p>
         </div>
         <div style={{ display:'flex', gap:'.75rem' }}>
+          {isAdmin && vehicles.length > 0 && (
+            <button className="vh-btn" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'#e2e8f0', padding:'.6rem 1.2rem', borderRadius:'12px' }} 
+              onClick={handleSelectAll}>
+              <Ico d="M9 11l3 3L22 4" size={15} /> {selectedVehicles.length === vehicles.length ? 'Deselect All' : 'Select All'}
+            </button>
+          )}
+          {selectedVehicles.length > 0 && (
+            <button className="vh-add-btn" style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }} onClick={handleBulkExport} disabled={bulkGenerating}>
+              {bulkGenerating ? <span className="vh-spinner" /> : <Ico d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3" size={15} />} Bulk Export Labels ({selectedVehicles.length})
+            </button>
+          )}
           <button className="vh-btn" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'#e2e8f0', padding:'.6rem 1.2rem', borderRadius:'12px' }} 
             onClick={() => exportToCSV(vehicles, `Vehicles_Export_${new Date().toLocaleDateString()}`, ['plateNumber', 'make', 'model', 'year', 'color', 'status', 'company', 'assignedTo'])}>
             <Ico d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3" size={15} /> Export CSV
@@ -733,6 +463,12 @@ const VehiclesList = ({ role }) => {
               return (
                 <div className="vh-card" key={v._id} style={{ animationDelay:`${i*.06}s` }}>
                   <div className="vh-card-accent" style={{ background: sc.bar }} />
+                  
+                  {isAdmin && (
+                    <div style={{ position: 'absolute', top: '1.2rem', right: '1.2rem', zIndex: 10 }}>
+                      <input type="checkbox" style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#6366f1' }} checked={selectedVehicles.includes(v._id)} onChange={() => handleSelect(v._id)} />
+                    </div>
+                  )}
 
                   <div className="vh-plate">
                     <Ico d="M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5z M9 9h6 M9 12h6 M9 15h4" size={12} />
@@ -765,8 +501,11 @@ const VehiclesList = ({ role }) => {
                   </div>
 
                   <div className="vh-card-footer">
-                    <button className="vh-btn vh-btn-qr" onClick={() => setQrModal(v)}>
+                    <button className="vh-btn vh-btn-qr" onClick={() => openQRModal(v)}>
                       <Ico d="M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h3 M14 21h3 M17 17h3v4 M20 14v3" size={13} /> QR
+                    </button>
+                    <button className="vh-btn" onClick={() => navigate('/vehicle/' + v._id)}>
+                      <Ico d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" size={13} /> Logbook
                     </button>
                     {isAdmin && (
                       <button className="vh-btn vh-btn-edit" onClick={() => openEdit(v)}>
@@ -883,24 +622,42 @@ const VehiclesList = ({ role }) => {
       {/* QR Modal */}
       {qrModal && (
         <div className="vh-overlay" onClick={e => e.target === e.currentTarget && setQrModal(null)}>
-          <div className="vh-qr-modal">
+          <div className="vh-qr-modal" style={{ maxWidth: '420px', padding: '1.5rem' }}>
             <div className="vh-qr-modal-accent" />
-            <div className="vh-qr-title">Vehicle QR Code</div>
-            <div className="vh-qr-box">
-              <QRCodeSVG
-                id={`qr-${qrModal._id}`}
-                value={JSON.stringify({ type:'vehicle', id:qrModal._id, plate:qrModal.plateNumber })}
-                size={190} level="H" includeMargin
-              />
-            </div>
-            <div className="vh-qr-plate">{qrModal.plateNumber}</div>
-            <div className="vh-qr-name">{qrModal.make} {qrModal.model} · {qrModal.year}</div>
-            <div className="vh-modal-footer">
-              <button className="vh-cancel-btn" onClick={() => setQrModal(null)}>Close</button>
-              <button className="vh-save-btn" onClick={() => downloadQR(`qr-${qrModal._id}`, qrModal.plateNumber)}>
-                <Ico d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3" size={15} /> Download SVG
-              </button>
-            </div>
+            <div className="vh-qr-title">Vehicle QR Label</div>
+            
+            {qrModal.loading ? (
+              <div style={{ padding: '3rem 0', color: '#64748b' }}>
+                <div className="vh-spinner" style={{ margin: '0 auto 1rem', width: 24, height: 24, borderColor: 'rgba(99,102,241,0.3)', borderTopColor: '#6366f1' }} />
+                Generating high-res PNG label...
+              </div>
+            ) : (
+              <>
+                <div style={{ background: '#fff', borderRadius: '12px', padding: '1rem', marginBottom: '1.5rem' }}>
+                  <img src={`${API_BASE_URL.replace('/api', '')}${qrModal.qrLabelImage}`} alt="Vehicle Label" style={{ width: '100%', height: 'auto', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
+                </div>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.5rem' }}>
+                  <a href={`${API_BASE_URL.replace('/api', '')}${qrModal.qrLabelImage}`} download={`Label_${qrModal.plateNumber}.png`} target="_blank" rel="noreferrer" className="vh-btn" style={{ background: 'rgba(99,102,241,0.1)', color: '#818cf8', borderColor: 'rgba(99,102,241,0.2)' }}>
+                    <Ico d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3" /> Download Label PNG
+                  </a>
+                  <a href={`${API_BASE_URL.replace('/api', '')}${qrModal.qrImage}`} download={`QR_${qrModal.plateNumber}.png`} target="_blank" rel="noreferrer" className="vh-btn">
+                    <Ico d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3" /> Download QR PNG
+                  </a>
+                  <button className="vh-btn" style={{ background: 'rgba(16,185,129,0.1)', color: '#34d399', borderColor: 'rgba(16,185,129,0.2)' }} onClick={() => {
+                    const printWindow = window.open('', '_blank');
+                    printWindow.document.write(`<html><body style="margin:0;padding:20px;text-align:center;"><img src="${API_BASE_URL.replace('/api', '')}${qrModal.qrLabelImage}" style="max-width:100%;height:auto;" onload="window.print();window.close();" /></body></html>`);
+                    printWindow.document.close();
+                  }}>
+                    <Ico d="M6 9V2h12v7 M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2 M6 14h12v8H6z" /> Print Label
+                  </button>
+                </div>
+                
+                <div className="vh-modal-footer">
+                  <button className="vh-cancel-btn" onClick={() => setQrModal(null)}>Close</button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

@@ -12,9 +12,12 @@ export const approvalApi = {
   updateDepartment: (id, data) => axios.put(`${API_BASE_URL}/departments/${id}`, data, getHeaders()),
   deleteDepartment: (id) => axios.delete(`${API_BASE_URL}/departments/${id}`, getHeaders()),
   
-  // Workflows
-  getWorkflow: (deptId) => axios.get(`${API_BASE_URL}/approval/workflows/${deptId}`, getHeaders()),
-  saveWorkflow: (data) => axios.post(`${API_BASE_URL}/approval/workflows`, data, getHeaders()),
+  // Workflows Templates CRUD
+  getWorkflows: () => axios.get(`${API_BASE_URL}/approval/workflows`, getHeaders()),
+  getWorkflowDetail: (id) => axios.get(`${API_BASE_URL}/approval/workflows/${id}`, getHeaders()),
+  createWorkflow: (data) => axios.post(`${API_BASE_URL}/approval/workflows`, data, getHeaders()),
+  updateWorkflow: (id, data) => axios.put(`${API_BASE_URL}/approval/workflows/${id}`, data, getHeaders()),
+  deleteWorkflow: (id) => axios.delete(`${API_BASE_URL}/approval/workflows/${id}`, getHeaders()),
   
   // Files
   getFiles: () => axios.get(`${API_BASE_URL}/approval/files`, getHeaders()),
@@ -28,7 +31,7 @@ export const approvalApi = {
   // Movements
   approveFile: (data) => axios.post(`${API_BASE_URL}/approval/movements/approve`, data, getHeaders()),
   rejectFile: (data) => axios.post(`${API_BASE_URL}/approval/movements/reject`, data, getHeaders()),
-  getFileHistory: (fileId) => axios.get(`${API_BASE_URL}/approval/movements/${fileId}`, getHeaders()),
+  getFileHistory: (fileId) => axios.get(`${API_BASE_URL}/approval/movements/${fileId}/history`, getHeaders()),
   
   // Notifications
   getNotifications: () => axios.get(`${API_BASE_URL}/approval/notifications`, getHeaders()),

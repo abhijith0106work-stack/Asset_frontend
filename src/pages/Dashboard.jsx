@@ -2105,24 +2105,14 @@ const Dashboard = () => {
   const [activities, setActivities] = useState([]);
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingActivities, setLoadingActivities] = useState(true);
-  const [notifications, setNotifications] = useState([]);
-  const [showNotif, setShowNotif] = useState(false);
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('theme');
     return saved ? saved === 'dark' : true;
   });
-  const [toasts, setToasts] = useState([]);
-  const notifRef = useRef(null);
 
   useEffect(() => {
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
   }, [isDark]);
-
-  const addToast = (message, type = 'info') => {
-    const id = Date.now();
-    setToasts(prev => [...prev, { id, message, type }]);
-    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 5000);
-  };
 
   // Inject styles
   useEffect(() => {
@@ -2132,21 +2122,9 @@ const Dashboard = () => {
     return () => document.head.removeChild(el);
   }, []);
 
-  // Close notif dropdown on outside click
-  useEffect(() => {
-    const handler = (e) => {
-      if (notifRef.current && !notifRef.current.contains(e.target)) setShowNotif(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
-
   useEffect(() => {
     if (!user) return;
     fetchStats();
-    fetchNotifications();
-    const iv = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(iv);
   }, []);
 
   useEffect(() => {
@@ -2207,22 +2185,6 @@ const Dashboard = () => {
     }
   };
 
-  const fetchNotifications = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get(`${API_BASE_URL}/approval/notifications`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      
-      const newOnes = res.data.filter(n => !n.isRead && !notifications.find(old => old._id === n._id));
-      if (newOnes.length > 0) {
-        newOnes.forEach(n => addToast(n.message, 'info'));
-      }
-
-      setNotifications(res.data);
-    } catch (err) { console.error(err); }
-  };
-
   if (!user) { navigate('/login'); return null; }
 
   const handleLogout = () => {
@@ -2257,21 +2219,8 @@ const Dashboard = () => {
         { label:'Assets',         value:stats.totalAssets,   color:'#6366f1', d:'M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z' },
       ];
 
-  const unread = notifications.filter(n => !n.isRead).length;
-
   return (
     <div className={`db-root ${!isDark ? 'light-mode' : ''}`}>
-
-      {/* Toasts */}
-      <div className="db-toast-container">
-        {toasts.map(t => (
-          <div key={t.id} className="db-toast">
-            <div className="db-toast-icon">⚡</div>
-            <div className="db-toast-msg">{t.message}</div>
-            <button className="db-toast-close" onClick={() => setToasts(prev => prev.filter(toast => toast.id !== t.id))}>✕</button>
-          </div>
-        ))}
-      </div>
 
       {/* ── TOPBAR ── */}
       <header className="db-topbar">
@@ -2293,40 +2242,6 @@ const Dashboard = () => {
             {isDark ? <Svg d="M12 3v1m0 16v1M4.22 4.22l.71.71m12.02 12.02.71.71M3 12h1m16 0h1M4.93 19.07l.71-.71M18.36 5.64l.71-.71 M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z" size={16} />
                      : <Svg d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" size={16} />}
           </button>
-
-          {/* Notifications */}
-          <div className="db-notif-wrap" ref={notifRef}>
-            <button className="db-icon-btn" onClick={() => setShowNotif(v => !v)}>
-              <Svg d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 0 1-3.46 0" size={16} />
-              {unread > 0 && <span className="db-notif-badge">{unread}</span>}
-            </button>
-            {showNotif && (
-              <div className="db-notif-panel">
-                <div className="db-notif-header">
-                  <span className="db-notif-title">Notifications</span>
-                  <button className="db-notif-clear" onClick={() => setNotifications([])}>Clear all</button>
-                </div>
-                <div className="db-notif-scroll">
-                  {notifications.length === 0
-                    ? <div className="db-notif-empty">You're all caught up ✓</div>
-                    : notifications.map(n => (
-                      <div key={n._id} className="db-notif-item" onClick={() => {
-                        setNotifications(p => p.filter(x => x._id !== n._id));
-                        setActiveTab('File Approval');
-                        setShowNotif(false);
-                      }}>
-                        <div className="db-notif-dot" />
-                        <div>
-                          <div className="db-notif-msg">{n.message}</div>
-                          <div className="db-notif-time">{new Date(n.createdAt).toLocaleString()}</div>
-                        </div>
-                      </div>
-                    ))
-                  }
-                </div>
-              </div>
-            )}
-          </div>
 
           {/* User pill */}
           <div className="db-user-pill">

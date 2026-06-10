@@ -1,443 +1,7 @@
-// import { API_BASE_URL } from '../config';
-// import React, { useState, useEffect } from 'react';
-// import axios from 'axios';
-// import { QRCodeCanvas } from 'qrcode.react';
-// import { useNavigate } from 'react-router-dom';
-
-// const STATUS_CONFIG = {
-//   Available: { bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.3)', text: '#34d399', dot: '#10b981' },
-//   Assigned:  { bg: 'rgba(99,102,241,0.12)',  border: 'rgba(99,102,241,0.3)',  text: '#818cf8', dot: '#6366f1' },
-//   Damaged:   { bg: 'rgba(239,68,68,0.12)',   border: 'rgba(239,68,68,0.3)',   text: '#fca5a5', dot: '#ef4444' },
-//   Retired:   { bg: 'rgba(100,116,139,0.12)', border: 'rgba(100,116,139,0.3)', text: '#94a3b8', dot: '#64748b' },
-// };
-
-// const TYPE_ICON = { IT: '◈', Stationary: '▣' };
-
-// const AssetsList = ({ role }) => {
-//   const navigate = useNavigate();
-//   const [assets, setAssets]             = useState([]);
-//   const [users, setUsers]               = useState([]);
-//   const [companies, setCompanies]       = useState([]);
-//   const [isModalOpen, setIsModalOpen]   = useState(false);
-//   const [filterStatus, setFilterStatus] = useState('All');
-//   const [filterType,   setFilterType]   = useState('All');
-//   const [filterCompany, setFilterCompany] = useState('All');
-//   const [formData, setFormData] = useState({
-//     name: '', type: 'IT', status: 'Available', assignedTo: '',
-//     macAddress: '', serialNumber: '', purchaseDate: '', model: '',
-//     subType: '', condition: 'New', osVersion: '', softwareLicenses: '',
-//     devicePassword: '', deviceUserName: '', deviceLocation: '', company: ''
-//   });
-//   const [imageFile,      setImageFile]      = useState(null);
-//   const [imagePreview,   setImagePreview]   = useState(null);
-//   const [saving,         setSaving]         = useState(false);
-//   const [editingAssetId, setEditingAssetId] = useState(null);
-
-//   useEffect(() => {
-//     fetchAssets();
-//     fetchCompanies();
-//     if (role === 'Super Admin' || role === 'Admin') fetchUsers();
-//   }, [role]);
-
-//   const fetchAssets = async () => {
-//     try {
-//       const token = localStorage.getItem('token');
-//       const url = role === 'User'
-//         ? `${API_BASE_URL}/assets/me`
-//         : `${API_BASE_URL}/assets`;
-//       const res = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } });
-//       setAssets(res.data);
-//     } catch (err) { console.error(err); }
-//   };
-
-//   const fetchUsers = async () => {
-//     try {
-//       const token = localStorage.getItem('token');
-//       const res = await axios.get(`${API_BASE_URL}/users`, {
-//         headers: { Authorization: `Bearer ${token}` }
-//       });
-//       setUsers(res.data);
-//     } catch (err) { console.error(err); }
-//   };
-
-//   const fetchCompanies = async () => {
-//     try {
-//       const token = localStorage.getItem('token');
-//       const res = await axios.get(`${API_BASE_URL}/companies`, {
-//         headers: { Authorization: `Bearer ${token}` }
-//       });
-//       setCompanies(res.data);
-//     } catch (err) { console.error(err); }
-//   };
-
-//   const handleChange = (e) => {
-//     const { name, value } = e.target;
-//     setFormData(prev => {
-//       const updated = { ...prev, [name]: value };
-//       if (name === 'assignedTo') {
-//         if (value && updated.status === 'Available') updated.status = 'Assigned';
-//         if (!value && updated.status === 'Assigned') updated.status = 'Available';
-//       }
-//       return updated;
-//     });
-//   };
-
-//   const handleFileChange = (e) => {
-//     const file = e.target.files[0];
-//     setImageFile(file || null);
-//     if (file) {
-//       const reader = new FileReader();
-//       reader.onloadend = () => setImagePreview(reader.result);
-//       reader.readAsDataURL(file);
-//     } else {
-//       setImagePreview(null);
-//     }
-//   };
-
-//   const handleSubmit = async () => {
-//     if (!formData.name.trim()) {
-//       alert('Asset name is required');
-//       return;
-//     }
-//     setSaving(true);
-//     try {
-//       const token  = localStorage.getItem('token');
-//       const config = { headers: { Authorization: `Bearer ${token}` } };
-
-//       const payload = new FormData();
-//       Object.keys(formData).forEach(key => {
-//         payload.append(key, formData[key] || '');
-//       });
-//       if (imageFile) payload.append('image', imageFile);
-
-//       if (editingAssetId) {
-//         await axios.put(`${API_BASE_URL}/assets/${editingAssetId}`, payload, config);
-//       } else {
-//         await axios.post(`${API_BASE_URL}/assets`, payload, config);
-//       }
-
-//       closeModal();
-//       fetchAssets();
-//     } catch (err) {
-//       alert(err.response?.data?.message || 'Error saving asset');
-//     } finally { setSaving(false); }
-//   };
-
-//   const handleEdit = (asset) => {
-//     setEditingAssetId(asset._id);
-//     setFormData({
-//       name: asset.name || '',
-//       type: asset.type || 'IT',
-//       status: asset.status || 'Available',
-//       assignedTo: asset.assignedTo?._id || asset.assignedTo || '',
-//       macAddress: asset.macAddress || '',
-//       serialNumber: asset.serialNumber || '',
-//       purchaseDate: asset.purchaseDate ? asset.purchaseDate.split('T')[0] : '',
-//       model: asset.model || '',
-//       subType: asset.subType || '',
-//       condition: asset.condition || 'New',
-//       osVersion: asset.osVersion || '',
-//       softwareLicenses: asset.softwareLicenses || '',
-//       devicePassword: asset.devicePassword || '',
-//       deviceUserName: asset.deviceUserName || '',
-//       deviceLocation: asset.deviceLocation || '',
-//       company: asset.company?._id || asset.company || ''
-//     });
-//     setImagePreview(asset.image ? `http://localhost:5000${asset.image}` : null);
-//     setImageFile(null);
-//     setIsModalOpen(true);
-//   };
-
-//   const handleDelete = async (id) => {
-//     if (!window.confirm('Are you sure you want to delete this asset?')) return;
-//     try {
-//       const token = localStorage.getItem('token');
-//       await axios.delete(`${API_BASE_URL}/assets/${id}`, {
-//         headers: { Authorization: `Bearer ${token}` }
-//       });
-//       fetchAssets();
-//     } catch (err) { alert('Error deleting asset'); }
-//   };
-
-//   const downloadLabel = (asset) => {
-//     const qrCanvas = document.getElementById(`qr-${asset._id}`);
-//     if (!qrCanvas) return;
-    
-//     const canvas = document.createElement('canvas');
-//     canvas.width = 1050; canvas.height = 300;
-//     const ctx = canvas.getContext('2d');
-    
-//     const drawContent = (logoImg = null) => {
-//       ctx.fillStyle = '#FFFFFF';
-//       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-//       // Draw QR Code
-//       ctx.drawImage(qrCanvas, 30, 30, 240, 240);
-      
-//       // Draw Logo (opposite side)
-//       if (logoImg) {
-//         ctx.drawImage(logoImg, canvas.width - 270, 30, 240, 240);
-//       }
-      
-//       ctx.fillStyle = '#000000';
-//       ctx.font = 'bold 45px sans-serif';
-//       ctx.fillText(asset.uniqueId ? `${asset.uniqueId} - ${asset.name}` : asset.name, 300, 80);
-      
-//       ctx.font = '28px sans-serif';
-//       ctx.fillText(`Model: ${asset.model || 'N/A'}`, 300, 130);
-//       ctx.fillText(`SN: ${asset.serialNumber || 'N/A'}`, 300, 175);
-//       ctx.fillText(`Location: ${asset.deviceLocation || 'N/A'}`, 300, 220);
-//       ctx.fillText(`Company: ${asset.company?.name || 'N/A'}`, 300, 265);
-      
-//       ctx.strokeStyle = '#000000'; ctx.lineWidth = 4;
-//       ctx.strokeRect(2, 2, canvas.width - 4, canvas.height - 4);
-      
-//       const pngUrl = canvas.toDataURL('image/png');
-//       const dl = document.createElement('a');
-//       dl.href = pngUrl; dl.download = `label-${asset.uniqueId || asset._id}.png`;
-//       dl.click();
-//     };
-
-//     if (asset.company?.logo) {
-//       const img = new Image();
-//       img.crossOrigin = 'anonymous'; // Important for canvas
-//       img.src = `http://localhost:5000${asset.company.logo}`;
-//       img.onload = () => drawContent(img);
-//       img.onerror = () => drawContent(); // Fallback if logo fails to load
-//     } else {
-//       drawContent();
-//     }
-//   };
-
-//   const exportCSV = () => {
-//     const headers = ['Unique ID', 'Name', 'Type', 'Status', 'Assigned To', 'Location', 'Company'];
-//     const rows = filtered.map(a => [
-//       a.uniqueId || '',
-//       a.name,
-//       a.type,
-//       a.status,
-//       a.assignedTo?.name || 'Unassigned',
-//       a.deviceLocation || '',
-//       a.company?.name || 'N/A'
-//     ]);
-//     const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
-//     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-//     const url = URL.createObjectURL(blob);
-//     const link = document.createElement("a");
-//     link.href = url;
-//     link.download = "assets_export.csv";
-//     link.click();
-//   };
-
-//   const closeModal = () => {
-//     setIsModalOpen(false);
-//     setEditingAssetId(null);
-//     setFormData({
-//       name: '', type: 'IT', status: 'Available', assignedTo: '',
-//       macAddress: '', serialNumber: '', purchaseDate: '', model: '',
-//       subType: '', condition: 'New', osVersion: '', softwareLicenses: '',
-//       devicePassword: '', deviceUserName: '', deviceLocation: '', company: ''
-//     });
-//     setImageFile(null);
-//     setImagePreview(null);
-//   };
-
-//   const filtered = assets.filter(a =>
-//     (filterStatus === 'All' || a.status === filterStatus) &&
-//     (filterType   === 'All' || a.type   === filterType) &&
-//     (filterCompany === 'All' || (a.company?._id || a.company) === filterCompany)
-//   );
-
-//   return (
-//     <div className="al-root">
-//       <style>{`
-//         .al-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-//         .al-actions { display: flex; gap: 0.75rem; }
-//         .al-toolbar { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
-//         .al-select { background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 0.6rem 1rem; color: white; outline: none; }
-//         .al-select option { background: #0f172a; }
-        
-//         .al-table-wrap { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; overflow: hidden; }
-//         .al-table { width: 100%; border-collapse: collapse; text-align: left; }
-//         .al-table th { padding: 1.25rem 1.5rem; background: rgba(255,255,255,0.03); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; border-bottom: 1px solid rgba(255,255,255,0.06); }
-//         .al-table td { padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.9rem; vertical-align: middle; }
-//         .al-asset-img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); }
-        
-//         .al-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justifyContent: center; z-index: 1000; padding: 1rem; }
-//         .al-modal { background: #0f172a; width: 600px; padding: 2rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); max-height: 90vh; overflow-y: auto; }
-//         .al-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-//         .al-form-group { margin-bottom: 1rem; }
-//         .al-label { display: block; color: #94a3b8; font-size: 0.75rem; margin-bottom: 0.4rem; }
-//         .al-input, .al-modal-select { width: 100%; background: #1e293b; border: 1px solid rgba(255,255,255,0.1); padding: 0.7rem; color: white; border-radius: 8px; }
-//         .al-modal-select option { background: #0f172a; color: white; }
-        
-//         .badge { padding: 0.2rem 0.6rem; border-radius: 100px; font-size: 0.75rem; font-weight: 600; }
-//         .btn-primary { background: #6366f1; color: white; border: none; padding: 0.7rem 1.4rem; border-radius: 10px; cursor: pointer; font-weight: 600; }
-//         .btn-secondary { background: rgba(255,255,255,0.05); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.1); padding: 0.7rem 1.4rem; border-radius: 10px; cursor: pointer; }
-//       `}</style>
-
-//       <div className="al-header">
-//         <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f1f5f9' }}>Asset Management</h2>
-//         <div className="al-actions">
-//           {(role === 'Super Admin' || role === 'Admin') && (
-//             <>
-//               <button className="btn-secondary" onClick={exportCSV}>Export CSV</button>
-//               <button className="btn-primary" onClick={() => setIsModalOpen(true)}>+ Add Asset</button>
-//             </>
-//           )}
-//         </div>
-//       </div>
-
-//       <div className="al-toolbar">
-//         <select className="al-select" value={filterType} onChange={e => setFilterType(e.target.value)}>
-//           <option value="All">All Types</option>
-//           <option value="IT">IT</option>
-//           <option value="Stationary">Stationary</option>
-//         </select>
-//         <select className="al-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
-//           <option value="All">All Statuses</option>
-//           <option value="Available">Available</option>
-//           <option value="Assigned">Assigned</option>
-//           <option value="Damaged">Damaged</option>
-//           <option value="Retired">Retired</option>
-//         </select>
-//         <select className="al-select" value={filterCompany} onChange={e => setFilterCompany(e.target.value)}>
-//           <option value="All">All Companies</option>
-//           {companies.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
-//         </select>
-//       </div>
-
-//       <div className="al-table-wrap">
-//         <table className="al-table">
-//           <thead>
-//             <tr>
-//               <th>ID & Name</th>
-//               <th>Type</th>
-//               <th>Location</th>
-//               <th>Company</th>
-//               <th>Status</th>
-//               {(role === 'Super Admin' || role === 'Admin') && <th>Actions</th>}
-//             </tr>
-//           </thead>
-//           <tbody>
-//             {filtered.map(asset => {
-//               const sc = STATUS_CONFIG[asset.status] || STATUS_CONFIG.Retired;
-//               return (
-//                 <tr key={asset._id}>
-//                   <td>
-//                     <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-//                       {asset.image ? <img src={`http://localhost:5000${asset.image}`} className="al-asset-img" alt="" /> : <div className="al-asset-img" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)' }}>{TYPE_ICON[asset.type]}</div>}
-//                       <div>
-//                         <div style={{ color: '#818cf8', fontSize: '0.7rem', fontFamily: 'monospace' }}>{asset.uniqueId}</div>
-//                         <div onClick={() => navigate(`/asset/${asset._id}`)} style={{ cursor: 'pointer', fontWeight: 600, color: '#f1f5f9', textDecoration: 'underline' }}>{asset.name}</div>
-//                       </div>
-//                     </div>
-//                   </td>
-//                   <td>{asset.type}</td>
-//                   <td>{asset.deviceLocation || '—'}</td>
-//                   <td style={{ color: '#818cf8', fontWeight: 500 }}>{asset.company?.name || 'N/A'}</td>
-//                   <td>
-//                     <span className="badge" style={{ background: sc.bg, border: `1px solid ${sc.border}`, color: sc.text }}>{asset.status}</span>
-//                   </td>
-//                   {(role === 'Super Admin' || role === 'Admin') && (
-//                     <td>
-//                       <div style={{ display: 'flex', gap: '0.5rem' }}>
-//                         <button onClick={() => handleEdit(asset)} style={{ background: 'none', border: 'none', color: '#818cf8', cursor: 'pointer' }}>Edit</button>
-//                         <button onClick={() => downloadLabel(asset)} style={{ background: 'none', border: 'none', color: '#10b981', cursor: 'pointer' }}>Label</button>
-//                         <button onClick={() => handleDelete(asset._id)} style={{ background: 'none', border: 'none', color: '#fca5a5', cursor: 'pointer' }}>Del</button>
-//                         <div style={{ display: 'none' }}><QRCodeCanvas id={`qr-${asset._id}`} value={`http://localhost:3000/asset/${asset._id}`} size={256} /></div>
-//                       </div>
-//                     </td>
-//                   )}
-//                 </tr>
-//               );
-//             })}
-//           </tbody>
-//         </table>
-//       </div>
-
-//       {isModalOpen && (
-//         <div className="al-modal-overlay">
-//           <div className="al-modal">
-//             <h3 style={{ marginBottom: '1.5rem', color: 'white' }}>{editingAssetId ? 'Edit Asset' : 'New Asset'}</h3>
-//             <div className="al-form-grid">
-//               <div className="al-form-group">
-//                 <label className="al-label">Asset Name</label>
-//                 <input className="al-input" name="name" value={formData.name} onChange={handleChange} />
-//               </div>
-//               <div className="al-form-group">
-//                 <label className="al-label">Type</label>
-//                 <select className="al-modal-select" name="type" value={formData.type} onChange={handleChange}>
-//                   <option value="IT">IT</option>
-//                   <option value="Stationary">Stationary</option>
-//                 </select>
-//               </div>
-//               <div className="al-form-group">
-//                 <label className="al-label">Location</label>
-//                 <input className="al-input" name="deviceLocation" value={formData.deviceLocation} onChange={handleChange} placeholder="e.g. Server Room" />
-//               </div>
-//               <div className="al-form-group">
-//                 <label className="al-label">Company</label>
-//                 <select className="al-modal-select" name="company" value={formData.company} onChange={handleChange}>
-//                   <option value="">Select Company</option>
-//                   {companies.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
-//                 </select>
-//               </div>
-//               <div className="al-form-group">
-//                 <label className="al-label">Status</label>
-//                 <select className="al-modal-select" name="status" value={formData.status} onChange={handleChange}>
-//                   <option value="Available">Available</option>
-//                   <option value="Assigned">Assigned</option>
-//                   <option value="Damaged">Damaged</option>
-//                   <option value="Retired">Retired</option>
-//                 </select>
-//               </div>
-//               <div className="al-form-group">
-//                 <label className="al-label">Assign To</label>
-//                 <select className="al-modal-select" name="assignedTo" value={formData.assignedTo} onChange={handleChange}>
-//                   <option value="">Unassigned</option>
-//                   {users.map(u => <option key={u._id} value={u._id}>{u.name}</option>)}
-//                 </select>
-//               </div>
-//               {formData.type === 'IT' && (
-//                 <>
-//                   <div className="al-form-group">
-//                     <label className="al-label">Model</label>
-//                     <input className="al-input" name="model" value={formData.model} onChange={handleChange} />
-//                   </div>
-//                   <div className="al-form-group">
-//                     <label className="al-label">Serial Number</label>
-//                     <input className="al-input" name="serialNumber" value={formData.serialNumber} onChange={handleChange} />
-//                   </div>
-//                 </>
-//               )}
-//             </div>
-            
-//             <div className="al-form-group" style={{ marginTop: '1rem' }}>
-//               <label className="al-label">Asset Image</label>
-//               <input type="file" onChange={handleFileChange} style={{ color: '#94a3b8', fontSize: '0.8rem' }} />
-//               {imagePreview && <img src={imagePreview} style={{ width: '100px', height: '100px', objectFit: 'cover', marginTop: '0.5rem', borderRadius: '8px' }} alt="" />}
-//             </div>
-
-//             <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-//               <button className="btn-secondary" onClick={closeModal} style={{ flex: 1 }}>Cancel</button>
-//               <button className="btn-primary" onClick={handleSubmit} style={{ flex: 1 }}>{saving ? 'Saving...' : editingAssetId ? 'Update' : 'Create'}</button>
-//             </div>
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default AssetsList;
-
-
-import { API_BASE_URL } from '../config';
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { QRCodeCanvas } from 'qrcode.react';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../config';
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 const STYLES = `
@@ -696,7 +260,9 @@ const Ico = ({ d, size = 14 }) => (
 const STATUS_CFG = {
   Available: { bg:'rgba(16,185,129,.12)',  border:'rgba(16,185,129,.3)',  text:'#34d399', dot:'#10b981', bar:'#10b981' },
   Assigned:  { bg:'rgba(99,102,241,.12)',  border:'rgba(99,102,241,.3)',  text:'#818cf8', dot:'#6366f1', bar:'#6366f1' },
+  'Under Maintenance': { bg:'rgba(245,158,11,.12)', border:'rgba(245,158,11,.3)', text:'#fbbf24', dot:'#f59e0b', bar:'#f59e0b' },
   Damaged:   { bg:'rgba(239,68,68,.12)',   border:'rgba(239,68,68,.3)',   text:'#fca5a5', dot:'#ef4444', bar:'#ef4444' },
+  Lost:      { bg:'rgba(244,63,94,.12)',    border:'rgba(244,63,94,.3)',    text:'#fda4af', dot:'#f43f5e', bar:'#f43f5e' },
   Retired:   { bg:'rgba(100,116,139,.12)', border:'rgba(100,116,139,.3)', text:'#94a3b8', dot:'#64748b', bar:'#64748b' },
 };
 
@@ -709,7 +275,8 @@ const BLANK_FORM = {
   name:'', type:'IT', status:'Available', assignedTo:'',
   macAddress:'', serialNumber:'', purchaseDate:'', model:'',
   subType:'', condition:'New', osVersion:'', softwareLicenses:'',
-  devicePassword:'', deviceUserName:'', deviceLocation:'', company:''
+  devicePassword:'', deviceUserName:'', deviceLocation:'', company:'',
+  brand:'', warrantyProvider:'', warrantyStartDate:'', warrantyExpiryDate:''
 };
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -727,6 +294,8 @@ const AssetsList = ({ role }) => {
   const [imageFile, setImageFile]       = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [saving, setSaving]             = useState(false);
+  const [selectedAssets, setSelectedAssets] = useState([]);
+  const [qrModal, setQrModal] = useState(null);
   const [editingId, setEditingId]       = useState(null);
   const imgRef = useRef();
   const isAdmin = role === 'Super Admin' || role === 'Admin';
@@ -793,7 +362,11 @@ const AssetsList = ({ role }) => {
       model: asset.model||'', subType: asset.subType||'', condition: asset.condition||'New',
       osVersion: asset.osVersion||'', softwareLicenses: asset.softwareLicenses||'',
       devicePassword: asset.devicePassword||'', deviceUserName: asset.deviceUserName||'',
-      deviceLocation: asset.deviceLocation||'', company: asset.company?._id||asset.company||''
+      deviceLocation: asset.deviceLocation||'', company: asset.company?._id||asset.company||'',
+      brand: asset.brand||'',
+      warrantyProvider: asset.warrantyProvider||'',
+      warrantyStartDate: asset.warrantyStartDate ? asset.warrantyStartDate.split('T')[0] : '',
+      warrantyExpiryDate: asset.warrantyExpiryDate ? asset.warrantyExpiryDate.split('T')[0] : ''
     });
     setImagePreview(asset.image ? `http://localhost:5000${asset.image}` : null);
     setImageFile(null); setIsModalOpen(true);
@@ -824,35 +397,46 @@ const AssetsList = ({ role }) => {
     } catch (err) { console.error(err); }
   };
 
-  const downloadLabel = (asset) => {
-    const qrCanvas = document.getElementById(`qr-${asset._id}`);
-    if (!qrCanvas) return;
-    const canvas = document.createElement('canvas');
-    canvas.width = 1050; canvas.height = 300;
-    const ctx = canvas.getContext('2d');
-    const draw = (logo = null) => {
-      ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0,0,canvas.width,canvas.height);
-      ctx.drawImage(qrCanvas, 30, 30, 240, 240);
-      if (logo) ctx.drawImage(logo, canvas.width-270, 30, 240, 240);
-      ctx.fillStyle = '#000'; ctx.font = 'bold 45px sans-serif';
-      ctx.fillText(asset.uniqueId ? `${asset.uniqueId} - ${asset.name}` : asset.name, 300, 80);
-      ctx.font = '28px sans-serif';
-      ctx.fillText(`Model: ${asset.model||'N/A'}`, 300, 130);
-      ctx.fillText(`SN: ${asset.serialNumber||'N/A'}`, 300, 175);
-      ctx.fillText(`Location: ${asset.deviceLocation||'N/A'}`, 300, 220);
-      ctx.fillText(`Company: ${asset.company?.name||'N/A'}`, 300, 265);
-      ctx.strokeStyle = '#000'; ctx.lineWidth = 4;
-      ctx.strokeRect(2,2,canvas.width-4,canvas.height-4);
+  const handleSelectAll = () => {
+    if (selectedAssets.length === filtered.length) setSelectedAssets([]);
+    else setSelectedAssets(filtered.map(a => a._id));
+  };
+
+  const handleSelect = (id) => {
+    setSelectedAssets(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
+  };
+
+  const handleBulkExport = async () => {
+    if (selectedAssets.length === 0) return alert('Select assets first');
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.post(`${API_BASE_URL}/assets/bulk-qr-export`, { assetIds: selectedAssets }, { 
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob' 
+      });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
       const link = document.createElement('a');
-      link.href = canvas.toDataURL('image/png');
-      link.download = `label-${asset.uniqueId||asset._id}.png`;
+      link.href = url;
+      link.setAttribute('download', 'Asset_QR_Labels.zip');
+      document.body.appendChild(link);
       link.click();
-    };
-    if (asset.company?.logo) {
-      const img = new Image(); img.crossOrigin = 'anonymous';
-      img.src = `http://localhost:5000${asset.company.logo}`;
-      img.onload = () => draw(img); img.onerror = () => draw();
-    } else { draw(); }
+    } catch (err) {
+      alert('Failed to generate bulk QR ZIP archive.');
+    }
+  };
+
+  const openQRModal = async (a) => {
+    setQrModal({ ...a, loading: true });
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.post(`${API_BASE_URL}/assets/${a._id}/generate-qr`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      setQrModal({ ...res.data, loading: false });
+      setAssets(prev => prev.map(item => item._id === a._id ? res.data : item));
+    } catch (err) {
+      console.error(err);
+      setQrModal(null);
+      alert('Failed: ' + (err.response?.data?.message || err.message));
+    }
   };
 
   const exportCSV = () => {
@@ -882,6 +466,11 @@ const AssetsList = ({ role }) => {
         </div>
         {isAdmin && (
           <div className="al-header-actions">
+            {selectedAssets.length > 0 && (
+              <button className="al-export-btn" onClick={handleBulkExport} style={{ borderColor: 'rgba(99,102,241,0.4)', color: '#818cf8' }}>
+                <Ico d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" size={14} /> Export Labels ({selectedAssets.length})
+              </button>
+            )}
             <button className="al-export-btn" onClick={exportCSV}>
               <Ico d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3" size={14} /> Export CSV
             </button>
@@ -921,12 +510,19 @@ const AssetsList = ({ role }) => {
         <table className="al-table">
           <thead>
             <tr>
+              {isAdmin && (
+                <th style={{ width: '40px' }}>
+                  <input type="checkbox" style={{ accentColor: '#6366f1', cursor: 'pointer' }}
+                    checked={selectedAssets.length === filtered.length && filtered.length > 0}
+                    onChange={handleSelectAll} />
+                </th>
+              )}
               <th>Asset</th>
               <th>Type</th>
               <th>Location</th>
               <th>Company</th>
               <th>Status</th>
-              {isAdmin && <th>Actions</th>}
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -960,6 +556,13 @@ const AssetsList = ({ role }) => {
                   const sc = STATUS_CFG[asset.status] || STATUS_CFG.Retired;
                   return (
                     <tr key={asset._id} style={{ animationDelay:`${i*.04}s` }}>
+                      {isAdmin && (
+                        <td>
+                          <input type="checkbox" style={{ accentColor: '#6366f1', cursor: 'pointer' }}
+                            checked={selectedAssets.includes(asset._id)}
+                            onChange={() => handleSelect(asset._id)} />
+                        </td>
+                      )}
                       <td>
                         <div className="al-asset-cell">
                           {asset.image
@@ -991,16 +594,12 @@ const AssetsList = ({ role }) => {
                             <button className="al-act-btn al-act-edit" onClick={() => handleEdit(asset)}>
                               <Ico d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7 M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" size={11} /> Edit
                             </button>
-                            <button className="al-act-btn al-act-label" onClick={() => downloadLabel(asset)}>
-                              <Ico d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" size={11} /> Label
+                            <button className="al-act-btn al-act-label" onClick={() => openQRModal(asset)}>
+                              <Ico d="M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h3 M14 21h3 M17 17h3v4 M20 14v3" size={11} /> Label
                             </button>
                             <button className="al-act-btn al-act-del" onClick={() => handleDelete(asset._id)}>
                               <Ico d="M3 6h18 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" size={11} /> Del
                             </button>
-                            {/* Hidden QR for label generation */}
-                            <div style={{ display:'none' }}>
-                              <QRCodeCanvas id={`qr-${asset._id}`} value={`http://localhost:3000/asset/${asset._id}`} size={256} />
-                            </div>
                           </div>
                         </td>
                       )}
@@ -1118,6 +717,25 @@ const AssetsList = ({ role }) => {
                   </div>
                 </>
               )}
+              <div className="al-section-label">Warranty & Brand Details</div>
+              <div className="al-2col">
+                <div className="al-field">
+                  <label className="al-label">Brand</label>
+                  <input className="al-input" placeholder="e.g. Dell" value={formData.brand} onChange={e => set('brand', e.target.value)} />
+                </div>
+                <div className="al-field">
+                  <label className="al-label">Warranty Provider</label>
+                  <input className="al-input" placeholder="e.g. Dell Care" value={formData.warrantyProvider} onChange={e => set('warrantyProvider', e.target.value)} />
+                </div>
+                <div className="al-field">
+                  <label className="al-label">Warranty Start Date</label>
+                  <input className="al-input" type="date" value={formData.warrantyStartDate} onChange={e => set('warrantyStartDate', e.target.value)} />
+                </div>
+                <div className="al-field">
+                  <label className="al-label">Warranty Expiry Date</label>
+                  <input className="al-input" type="date" value={formData.warrantyExpiryDate} onChange={e => set('warrantyExpiryDate', e.target.value)} />
+                </div>
+              </div>
 
               <div className="al-section-label">Image</div>
               <div className={`al-img-zone${imagePreview ? ' has-img' : ''}`} onClick={() => imgRef.current?.click()}>

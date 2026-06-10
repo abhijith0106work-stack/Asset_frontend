@@ -1,349 +1,7 @@
-// import { API_BASE_URL } from '../config';
-// import React, { useState, useEffect } from 'react';
-// import axios from 'axios';
-
-// const PRIORITY_CONFIG = {
-//   High:   { bg: 'rgba(239,68,68,0.1)',   border: 'rgba(239,68,68,0.28)',   text: '#fca5a5', dot: '#ef4444', icon: '▲' },
-//   Medium: { bg: 'rgba(245,158,11,0.1)',  border: 'rgba(245,158,11,0.28)',  text: '#fcd34d', dot: '#f59e0b', icon: '◆' },
-//   Low:    { bg: 'rgba(16,185,129,0.1)',  border: 'rgba(16,185,129,0.28)', text: '#6ee7b7', dot: '#10b981', icon: '▼' },
-// };
-
-// const STATUS_CONFIG = {
-//   'Open':             { bg: 'rgba(239,68,68,0.1)',   border: 'rgba(239,68,68,0.28)',   text: '#fca5a5', dot: '#ef4444' },
-//   'In Progress':      { bg: 'rgba(99,102,241,0.1)',  border: 'rgba(99,102,241,0.28)',  text: '#a5b4fc', dot: '#6366f1' },
-//   'Pending Approval': { bg: 'rgba(245,158,11,0.1)',  border: 'rgba(245,158,11,0.28)',  text: '#fcd34d', dot: '#f59e0b' },
-//   'Done':             { bg: 'rgba(16,185,129,0.1)',  border: 'rgba(16,185,129,0.28)', text: '#6ee7b7', dot: '#10b981' },
-//   'Closed':           { bg: 'rgba(100,116,139,0.1)', border: 'rgba(100,116,139,0.28)',text: '#94a3b8', dot: '#64748b' },
-//   'Not Possible':      { bg: 'rgba(239,68,68,0.15)',  border: 'rgba(239,68,68,0.3)',   text: '#f87171', dot: '#dc2626' },
-//   'Need Clarification': { bg: 'rgba(168,85,247,0.1)', border: 'rgba(168,85,247,0.28)', text: '#d8b4fe', dot: '#a855f7' },
-// };
-
-// const CATEGORY_ICON = { IT: '◈', Stationary: '▣', Vehicle: '🚗', Other: '◎' };
-
-// const TicketsList = ({ role }) => {
-//   const [tickets, setTickets]               = useState([]);
-//   const [users, setUsers]                   = useState([]);
-//   const [vehicles, setVehicles]             = useState([]);
-//   const [isRaiseModalOpen, setIsRaiseModalOpen]   = useState(false);
-//   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
-//   const [currentTicket, setCurrentTicket]   = useState(null);
-//   const [filterStatus,   setFilterStatus]   = useState('All');
-//   const [ticketView, setTicketView] = useState('Raised'); 
-//   const [saving, setSaving] = useState(false);
-
-//   const [raiseForm, setRaiseForm] = useState({ title: '', description: '', priority: 'Medium', category: 'IT', vehicleId: '' });
-//   const [attachmentFile, setAttachmentFile] = useState(null);
-//   const [manageForm, setManageForm] = useState({ assignedTo: '', status: '', remarks: '' });
-
-//   const currentUser = JSON.parse(localStorage.getItem('user'));
-//   const isOpsAdmin = (currentUser.role === 'Admin' || currentUser.role === 'Company Admin') && 
-//                      currentUser.department?.name?.toLowerCase().includes('operations');
-//   const isSuperAdmin = currentUser.role === 'Super Admin';
-//   const isAdminOrOps = isSuperAdmin || isOpsAdmin;
-
-//   useEffect(() => {
-//     fetchTickets();
-//     if (isAdminOrOps) fetchUsers();
-//     fetchVehicles();
-//   }, [role]);
-
-//   const fetchTickets = async () => {
-//     try {
-//       const token = localStorage.getItem('token');
-//       const res = await axios.get(`${API_BASE_URL}/tickets`, {
-//         headers: { Authorization: `Bearer ${token}` }
-//       });
-//       setTickets(res.data);
-//     } catch (err) { console.error(err); }
-//   };
-
-//   const fetchUsers = async () => {
-//     try {
-//       const token = localStorage.getItem('token');
-//       const res = await axios.get(`${API_BASE_URL}/users`, {
-//         headers: { Authorization: `Bearer ${token}` }
-//       });
-//       setUsers(res.data);
-//     } catch (err) { console.error(err); }
-//   };
-
-//   const fetchVehicles = async () => {
-//     try {
-//       const token = localStorage.getItem('token');
-//       const res = await axios.get(`${API_BASE_URL}/vehicles`, {
-//         headers: { Authorization: `Bearer ${token}` }
-//       });
-//       setVehicles(res.data);
-//     } catch (err) { console.error(err); }
-//   };
-
-//   const handleRaiseSubmit = async (e) => {
-//     e.preventDefault();
-//     setSaving(true);
-//     try {
-//       const token = localStorage.getItem('token');
-//       const fd = new FormData();
-//       fd.append('title', raiseForm.title);
-//       fd.append('description', raiseForm.description);
-//       fd.append('priority', raiseForm.priority);
-//       fd.append('category', raiseForm.category);
-//       if (raiseForm.vehicleId) fd.append('vehicleId', raiseForm.vehicleId);
-//       if (attachmentFile) fd.append('attachment', attachmentFile);
-      
-//       await axios.post(`${API_BASE_URL}/tickets`, fd, {
-//         headers: { Authorization: `Bearer ${token}` }
-//       });
-//       setIsRaiseModalOpen(false);
-//       setRaiseForm({ title: '', description: '', priority: 'Medium', category: 'IT', vehicleId: '' });
-//       setAttachmentFile(null);
-//       fetchTickets();
-//     } catch (err) { alert('Error raising ticket'); }
-//     finally { setSaving(false); }
-//   };
-
-//   const openManageModal = (ticket) => {
-//     setCurrentTicket(ticket);
-//     setManageForm({ 
-//       assignedTo: ticket.assignedTo?._id || ticket.assignedTo || '', 
-//       status: ticket.status,
-//       remarks: ticket.remarks || ''
-//     });
-//     setIsManageModalOpen(true);
-//   };
-
-//   const handleManageSubmit = async (e) => {
-//     e.preventDefault();
-//     setSaving(true);
-//     try {
-//       const token = localStorage.getItem('token');
-//       await axios.put(`${API_BASE_URL}/tickets/${currentTicket._id}`, manageForm, {
-//         headers: { Authorization: `Bearer ${token}` }
-//       });
-//       setIsManageModalOpen(false);
-//       fetchTickets();
-//     } catch (err) {
-//       alert(err.response?.data?.message || 'Error updating ticket');
-//     } finally { setSaving(false); }
-//   };
-
-//   const filtered = tickets.filter(t => {
-//     const statusMatch = filterStatus === 'All' || t.status === filterStatus;
-//     const viewMatch = ticketView === 'All' 
-//       ? true 
-//       : ticketView === 'Raised' 
-//         ? (t.createdBy?._id || t.createdBy) === currentUser._id
-//         : (t.assignedTo?._id || t.assignedTo) === currentUser._id;
-//     return statusMatch && viewMatch;
-//   });
-
-//   const getStatusOptions = (ticket) => {
-//     const isAssignee = (ticket.assignedTo?._id || ticket.assignedTo) === currentUser._id;
-    
-//     if (isSuperAdmin || isOpsAdmin) {
-//       return [
-//         { label: 'Open', value: 'Open' },
-//         { label: 'In Progress', value: 'In Progress' },
-//         { label: 'Need Clarification', value: 'Need Clarification' },
-//         { label: 'Done', value: 'Done' },
-//         { label: 'Closed', value: 'Closed' }
-//       ];
-//     } else if (isAssignee) {
-//       return [
-//         { label: 'In Progress', value: 'In Progress' },
-//         { label: 'Not Possible', value: 'Not Possible' },
-//         { label: 'Need Clarification', value: 'Need Clarification' },
-//         { label: 'Pending Approval', value: 'Pending Approval' }
-//       ];
-//     }
-//     return [{ label: ticket.status, value: ticket.status }];
-//   };
-
-//   return (
-//     <div className="tl-root">
-//       <style>{`
-//         .tl-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-//         .tl-toolbar { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; align-items: center; }
-//         .tl-tabs { display: flex; background: rgba(255,255,255,0.04); padding: 0.25rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); }
-//         .tl-tab { padding: 0.5rem 1.2rem; border-radius: 10px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #94a3b8; transition: all 0.2s; }
-//         .tl-tab.active { background: #6366f1; color: white; box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
-//         .tl-select { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 0.6rem 1rem; color: white; outline: none; }
-//         .tl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; }
-//         .tl-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1.5rem; position: relative; display: flex; flex-direction: column; }
-//         .tl-card-header { display: flex; justify-content: space-between; margin-bottom: 1rem; }
-//         .tl-title { font-size: 1.1rem; font-weight: 600; color: #f1f5f9; margin-bottom: 0.5rem; }
-//         .tl-desc { font-size: 0.85rem; color: #94a3b8; line-height: 1.5; margin-bottom: 1.2rem; flex-grow: 1; }
-//         .tl-meta { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
-//         .badge { padding: 0.2rem 0.6rem; border-radius: 100px; font-size: 0.7rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.3rem; }
-//         .tl-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06); }
-//         .tl-user-info { font-size: 0.75rem; color: #64748b; }
-//         .tl-manage-btn { background: rgba(99,102,241,0.1); color: #818cf8; border: 1px solid rgba(99,102,241,0.2); padding: 0.4rem 0.8rem; border-radius: 8px; cursor: pointer; font-size: 0.8rem; }
-//         .tl-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justifyContent: center; z-index: 1000; padding: 1rem; }
-//         .tl-modal { background: #0f172a; width: 480px; padding: 2rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); max-height: 90vh; overflow-y: auto; }
-//         .tl-form-group { margin-bottom: 1.2rem; }
-//         .tl-label { display: block; color: #94a3b8; font-size: 0.8rem; margin-bottom: 0.4rem; }
-//         .tl-input, .tl-modal-select, .tl-textarea { width: 100%; background: #1e293b; border: 1px solid rgba(255,255,255,0.1); padding: 0.75rem; color: white; border-radius: 10px; outline: none; }
-//         .tl-modal-select option { background: #0f172a; color: white; }
-//         .tl-textarea { min-height: 100px; resize: none; }
-//         .btn-primary { background: #6366f1; color: white; border: none; padding: 0.7rem 1.4rem; border-radius: 10px; cursor: pointer; font-weight: 600; width: 100%; }
-//         .btn-secondary { background: rgba(255,255,255,0.05); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.1); padding: 0.7rem 1.4rem; border-radius: 10px; cursor: pointer; width: 100%; }
-//       `}</style>
-
-//       <div className="tl-header">
-//         <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#f1f5f9' }}>Tickets</h2>
-//         <button className="btn-primary" style={{ width: 'auto' }} onClick={() => setIsRaiseModalOpen(true)}>+ Raise Ticket</button>
-//       </div>
-
-//       <div className="tl-toolbar">
-//         <div className="tl-tabs">
-//           {isAdminOrOps && <div className={`tl-tab ${ticketView === 'All' ? 'active' : ''}`} onClick={() => setTicketView('All')}>All Tickets</div>}
-//           <div className={`tl-tab ${ticketView === 'Raised' ? 'active' : ''}`} onClick={() => setTicketView('Raised')}>Raised By Me</div>
-//           <div className={`tl-tab ${ticketView === 'Assigned' ? 'active' : ''}`} onClick={() => setTicketView('Assigned')}>Assigned To Me</div>
-//         </div>
-
-//         <select className="tl-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
-//           <option value="All">All Statuses</option>
-//           <option value="Open">Open</option>
-//           <option value="In Progress">In Progress</option>
-//           <option value="Pending Approval">Pending Approval</option>
-//           <option value="Done">Done</option>
-//           <option value="Need Clarification">Need Clarification</option>
-//           <option value="Not Possible">Not Possible</option>
-//           <option value="Closed">Closed</option>
-//         </select>
-//       </div>
-
-//       <div className="tl-grid">
-//         {filtered.map(ticket => {
-//           const sc = STATUS_CONFIG[ticket.status] || STATUS_CONFIG.Closed;
-//           const pc = PRIORITY_CONFIG[ticket.priority] || PRIORITY_CONFIG.Medium;
-//           return (
-//             <div key={ticket._id} className="tl-card">
-//               <div className="tl-card-header">
-//                 <span className="badge" style={{ background: pc.bg, border: `1px solid ${pc.border}`, color: pc.text }}>{pc.icon} {ticket.priority}</span>
-//                 <span className="badge" style={{ background: sc.bg, border: `1px solid ${sc.border}`, color: sc.text }}>{ticket.status}</span>
-//               </div>
-//               <div className="tl-title">{ticket.title}</div>
-//               <div className="tl-desc">{ticket.description}</div>
-//               <div className="tl-meta">
-//                 <span style={{ fontSize: '0.75rem', color: '#6366f1' }}>{CATEGORY_ICON[ticket.category]} {ticket.category}</span>
-//                 {ticket.vehicleId && <span style={{ fontSize: '0.75rem', color: '#fbbf24' }}>🚗 {ticket.vehicleId.plateNumber}</span>}
-//                 {ticket.attachment && <a href={`${API_BASE_URL.replace('/api', '')}${ticket.attachment}`} target="_blank" rel="noreferrer" style={{ fontSize: '0.75rem', color: '#10b981', textDecoration: 'none' }}>📎 Attachment</a>}
-//               </div>
-//               <div className="tl-footer">
-//                 <div className="tl-user-info">
-//                   By: {ticket.createdBy?.name || 'User'}<br/>
-//                   Assignee: {ticket.assignedTo?.name || 'Unassigned'}
-//                 </div>
-//                 <button className="tl-manage-btn" onClick={() => openManageModal(ticket)}>Manage</button>
-//               </div>
-//             </div>
-//           );
-//         })}
-//       </div>
-
-//       {isRaiseModalOpen && (
-//         <div className="tl-modal-overlay">
-//           <div className="tl-modal">
-//             <h3 style={{ marginBottom: '1.5rem', color: 'white' }}>Raise New Ticket</h3>
-//             <form onSubmit={handleRaiseSubmit}>
-//               <div className="tl-form-group">
-//                 <label className="tl-label">Title</label>
-//                 <input className="tl-input" value={raiseForm.title} onChange={e => setRaiseForm({...raiseForm, title: e.target.value})} required />
-//               </div>
-//               <div className="tl-form-group">
-//                 <label className="tl-label">Description</label>
-//                 <textarea className="tl-textarea" value={raiseForm.description} onChange={e => setRaiseForm({...raiseForm, description: e.target.value})} required />
-//               </div>
-//               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-//                 <div className="tl-form-group">
-//                   <label className="tl-label">Priority</label>
-//                   <select className="tl-modal-select" value={raiseForm.priority} onChange={e => setRaiseForm({...raiseForm, priority: e.target.value})}>
-//                     <option value="Low">Low</option>
-//                     <option value="Medium">Medium</option>
-//                     <option value="High">High</option>
-//                   </select>
-//                 </div>
-//                 <div className="tl-form-group">
-//                   <label className="tl-label">Category</label>
-//                   <select className="tl-modal-select" value={raiseForm.category} onChange={e => setRaiseForm({...raiseForm, category: e.target.value})}>
-//                     <option value="IT">IT</option>
-//                     <option value="Stationary">Stationary</option>
-//                     <option value="Vehicle">Vehicle</option>
-//                     <option value="Other">Other</option>
-//                   </select>
-//                 </div>
-//               </div>
-
-//               {raiseForm.category === 'Vehicle' && (
-//                 <div className="tl-form-group">
-//                   <label className="tl-label">Select Vehicle</label>
-//                   <select className="tl-modal-select" value={raiseForm.vehicleId} onChange={e => setRaiseForm({...raiseForm, vehicleId: e.target.value})} required>
-//                     <option value="">-- Choose Vehicle --</option>
-//                     {vehicles.map(v => (
-//                       <option key={v._id} value={v._id}>{v.plateNumber} - {v.make} {v.model}</option>
-//                     ))}
-//                   </select>
-//                 </div>
-//               )}
-
-//               <div className="tl-form-group">
-//                 <label className="tl-label">Attachment</label>
-//                 <input type="file" onChange={e => setAttachmentFile(e.target.files[0])} style={{ color: '#94a3b8', fontSize: '0.8rem' }} />
-//               </div>
-//               <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-//                 <button type="button" className="btn-secondary" onClick={() => setIsRaiseModalOpen(false)}>Cancel</button>
-//                 <button type="submit" className="btn-primary">{saving ? 'Submitting...' : 'Submit'}</button>
-//               </div>
-//             </form>
-//           </div>
-//         </div>
-//       )}
-
-//       {isManageModalOpen && (
-//         <div className="tl-modal-overlay">
-//           <div className="tl-modal">
-//             <h3 style={{ marginBottom: '1.5rem', color: 'white' }}>Manage Ticket</h3>
-//             <form onSubmit={handleManageSubmit}>
-//               <div className="tl-form-group">
-//                 <label className="tl-label">Status</label>
-//                 <select className="tl-modal-select" value={manageForm.status} onChange={e => setManageForm({...manageForm, status: e.target.value})}>
-//                   {getStatusOptions(currentTicket).map(opt => (
-//                     <option key={opt.value} value={opt.value}>{opt.label}</option>
-//                   ))}
-//                 </select>
-//               </div>
-//               {isAdminOrOps && (
-//                 <div className="tl-form-group">
-//                   <label className="tl-label">Assign To</label>
-//                   <select className="tl-modal-select" value={manageForm.assignedTo} onChange={e => setManageForm({...manageForm, assignedTo: e.target.value})}>
-//                     <option value="">Unassigned</option>
-//                     {users.map(u => <option key={u._id} value={u._id}>{u.name} ({u.role}) - {u.department?.name || 'No Dept'}</option>)}
-//                   </select>
-//                 </div>
-//               )}
-//               <div className="tl-form-group">
-//                 <label className="tl-label">Remarks / Resolution Details</label>
-//                 <textarea className="tl-textarea" value={manageForm.remarks} onChange={e => setManageForm({...manageForm, remarks: e.target.value})} placeholder="Add details..." />
-//               </div>
-//               <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-//                 <button type="button" className="btn-secondary" onClick={() => setIsManageModalOpen(false)}>Cancel</button>
-//                 <button type="submit" className="btn-primary">{saving ? 'Updating...' : 'Update'}</button>
-//               </div>
-//             </form>
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default TicketsList;
-
-
-import { API_BASE_URL } from '../config';
-import { exportToCSV } from '../utils/exportUtils';
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { exportToCSV } from '../utils/exportUtils';
+import { API_BASE_URL } from '../config';
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 const STYLES = `
@@ -598,6 +256,53 @@ const STYLES = `
   }
   .tl-preview-title { font-family:'Syne',sans-serif;font-size:.92rem;font-weight:700;color:#f1f5f9;margin-bottom:.4rem; }
   .tl-preview-badges { display:flex;gap:.5rem;flex-wrap:wrap; }
+
+  /* New Wide Manage layout */
+  .tl-modal.manage-wide { max-width: 880px; }
+  .tl-manage-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+  @media(min-width: 768px) {
+    .tl-manage-grid { grid-template-columns: 1fr 1fr; }
+  }
+  .tl-manage-col-left { display: flex; flex-direction: column; gap: 1rem; }
+  .tl-manage-col-right {
+    display: flex; flex-direction: column;
+    border-left: 1px solid rgba(255,255,255,0.07);
+    padding-left: 1.5rem;
+    min-height: 380px;
+  }
+  @media(max-width: 767px) {
+    .tl-manage-col-right { border-left: none; padding-left: 0; border-top: 1px solid rgba(255,255,255,0.07); padding-top: 1.5rem; }
+  }
+  .tl-modal-tabs { display: flex; gap: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.07); margin-bottom: 1rem; }
+  .tl-modal-tab-btn {
+    padding: 0.5rem 1rem; background: none; border: none; color: #64748b; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.2s; border-bottom: 2px solid transparent; font-size: 0.8rem;
+  }
+  .tl-modal-tab-btn:hover { color: #cbd5e1; }
+  .tl-modal-tab-btn.active { color: #6366f1; border-bottom-color: #6366f1; }
+  
+  .tl-comments-list { display: flex; flex-direction: column; gap: 0.8rem; max-height: 250px; overflow-y: auto; margin-bottom: 1rem; padding-right: 0.5rem; }
+  .tl-comments-list::-webkit-scrollbar { width: 3px; }
+  .tl-comments-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 3px; }
+  .tl-comment-item { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 0.7rem; border-radius: 10px; }
+  .tl-comment-meta { display: flex; justify-content: space-between; font-size: 0.68rem; color: #64748b; margin-bottom: 0.25rem; font-family: 'DM Mono', monospace; }
+  .tl-comment-text { font-size: 0.8rem; color: #cbd5e1; line-height: 1.4; }
+  
+  .tl-comment-form { display: flex; flex-direction: column; gap: 0.6rem; }
+  .tl-comment-input-row { display: flex; gap: 0.5rem; }
+  .tl-comment-file-zone { border: 1px dashed rgba(255,255,255,0.08); padding: 0.4rem; border-radius: 8px; font-size: 0.75rem; text-align: center; color: #64748b; cursor: pointer; position: relative; }
+  .tl-comment-file-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  
+  .tl-activities-list { display: flex; flex-direction: column; gap: 0.8rem; max-height: 350px; overflow-y: auto; padding-right: 0.5rem; }
+  .tl-activities-list::-webkit-scrollbar { width: 3px; }
+  .tl-activities-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 3px; }
+  .tl-activity-item { display: flex; gap: 0.6rem; font-size: 0.78rem; position: relative; padding-bottom: 0.5rem; }
+  .tl-activity-item::before { content: ''; position: absolute; left: 7px; top: 18px; bottom: 0; width: 1px; background: rgba(255,255,255,0.05); }
+  .tl-activity-item:last-child::before { display: none; }
+  .tl-activity-dot { width: 15px; height: 15px; border-radius: 50%; background: #6366f1; border: 3px solid #0d1117; flex-shrink: 0; }
+  .tl-activity-info { display: flex; flex-direction: column; }
+  .tl-activity-action { font-weight: 600; color: #f8fafc; }
+  .tl-activity-remarks { font-size: 0.72rem; color: #64748b; margin-top: 0.15rem; }
+  .tl-activity-meta { font-size: 0.65rem; color: #475569; margin-top: 0.1rem; font-family: 'DM Mono', monospace; }
 `;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -632,9 +337,11 @@ const CAT_ICONS = {
 };
 
 // ── Component ─────────────────────────────────────────────────────────────────
+// ── Component ─────────────────────────────────────────────────────────────────
 const TicketsList = ({ role, onTicketCreated }) => {
   const [tickets, setTickets]               = useState([]);
   const [users, setUsers]                   = useState([]);
+  const [departments, setDepartments]       = useState([]);
   const [vehicles, setVehicles]             = useState([]);
   const [loading, setLoading]               = useState(true);
   const [isRaiseOpen, setIsRaiseOpen]       = useState(false);
@@ -645,10 +352,20 @@ const TicketsList = ({ role, onTicketCreated }) => {
   const [saving, setSaving]                 = useState(false);
   const [attachFile, setAttachFile]         = useState(null);
 
+  // Comments and activities states
+  const [comments, setComments]             = useState([]);
+  const [commentContent, setCommentContent] = useState('');
+  const [commentFile, setCommentFile]       = useState(null);
+  const [activities, setActivities]         = useState([]);
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [loadingActivities, setLoadingActivities] = useState(false);
+  const [modalTab, setModalTab]             = useState('comments'); // 'comments' | 'activity'
+
   const [raiseForm, setRaiseForm] = useState({ title:'', description:'', priority:'Medium', category:'IT', vehicleId:'' });
-  const [manageForm, setManageForm] = useState({ assignedTo:'', status:'', remarks:'' });
+  const [manageForm, setManageForm] = useState({ assignedTo:'', assignedDepartment:'', status:'', remarks:'' });
 
   const fileRef = useRef();
+  const commentFileRef = useRef();
   const currentUser = JSON.parse(localStorage.getItem('user'));
   const isOpsAdmin  = (currentUser.role === 'Admin' || currentUser.role === 'Company Admin') && currentUser.department?.name?.toLowerCase().includes('operations');
   const isSuperAdmin = currentUser.role === 'Super Admin';
@@ -663,7 +380,10 @@ const TicketsList = ({ role, onTicketCreated }) => {
 
   useEffect(() => {
     fetchTickets();
-    if (isAdminOrOps) fetchUsers();
+    if (isAdminOrOps) {
+      fetchUsers();
+      fetchDepartments();
+    }
     fetchVehicles();
   }, [role]);
 
@@ -684,12 +404,66 @@ const TicketsList = ({ role, onTicketCreated }) => {
     } catch (err) { console.error(err); }
   };
 
+  const fetchDepartments = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${API_BASE_URL}/departments`, { headers:{ Authorization:`Bearer ${token}` } });
+      setDepartments(res.data);
+    } catch (err) { console.error(err); }
+  };
+
   const fetchVehicles = async () => {
     try {
       const token = localStorage.getItem('token');
       const res = await axios.get(`${API_BASE_URL}/vehicles`, { headers:{ Authorization:`Bearer ${token}` } });
       setVehicles(res.data);
     } catch (err) { console.error(err); }
+  };
+
+  const fetchComments = async (tid) => {
+    setLoadingComments(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${API_BASE_URL}/tickets/${tid}/comments`, { headers:{ Authorization:`Bearer ${token}` } });
+      setComments(res.data);
+    } catch (err) { console.error(err); }
+    finally { setLoadingComments(false); }
+  };
+
+  const fetchActivities = async (tid) => {
+    setLoadingActivities(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${API_BASE_URL}/tickets/${tid}/activities`, { headers:{ Authorization:`Bearer ${token}` } });
+      setActivities(res.data);
+    } catch (err) { console.error(err); }
+    finally { setLoadingActivities(false); }
+  };
+
+  const handleAddComment = async (e) => {
+    e.preventDefault();
+    if (!commentContent.trim() && !commentFile) return;
+    try {
+      const token = localStorage.getItem('token');
+      const fd = new FormData();
+      fd.append('content', commentContent);
+      if (commentFile) fd.append('attachment', commentFile);
+      
+      await axios.post(`${API_BASE_URL}/tickets/${currentTicket._id}/comments`, fd, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      setCommentContent('');
+      setCommentFile(null);
+      if (commentFileRef.current) commentFileRef.current.value = '';
+      fetchComments(currentTicket._id);
+      fetchActivities(currentTicket._id);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to post comment.');
+    }
   };
 
   const setR = (k, v) => setRaiseForm(p => ({ ...p, [k]: v }));
@@ -714,8 +488,16 @@ const TicketsList = ({ role, onTicketCreated }) => {
 
   const openManage = (ticket) => {
     setCurrentTicket(ticket);
-    setManageForm({ assignedTo: ticket.assignedTo?._id||ticket.assignedTo||'', status: ticket.status, remarks: ticket.remarks||'' });
+    setManageForm({
+      assignedTo: ticket.assignedTo?._id||ticket.assignedTo||'',
+      assignedDepartment: ticket.assignedDepartment?._id||ticket.assignedDepartment||'',
+      status: ticket.status,
+      remarks: ticket.remarks||''
+    });
     setIsManageOpen(true);
+    setModalTab('comments');
+    fetchComments(ticket._id);
+    fetchActivities(ticket._id);
   };
 
   const handleManage = async (e) => {
@@ -724,7 +506,8 @@ const TicketsList = ({ role, onTicketCreated }) => {
       const token = localStorage.getItem('token');
       const data = { status: manageForm.status, remarks: manageForm.remarks };
       if (isAdminOrOps) {
-        data.assignedTo = manageForm.assignedTo;
+        data.assignedTo = manageForm.assignedTo || null;
+        data.assignedDepartment = manageForm.assignedDepartment || null;
       }
       await axios.put(`${API_BASE_URL}/tickets/${currentTicket._id}`, data, { headers:{ Authorization:`Bearer ${token}` } });
       setIsManageOpen(false); fetchTickets();
@@ -735,12 +518,12 @@ const TicketsList = ({ role, onTicketCreated }) => {
   };
 
   const getStatusOpts = (ticket) => {
-    const isAssignee = (ticket.assignedTo?._id||ticket.assignedTo) === currentUser._id;
+    const isAssignee = (ticket.assignedTo?._id||ticket.assignedTo) === currentUser._id ||
+                       (ticket.assignedDepartment?._id||ticket.assignedDepartment) === currentUser.department?._id;
     const isCreator  = (ticket.createdBy?._id||ticket.createdBy) === currentUser._id;
     
-    if (isSuperAdmin || isOpsAdmin) return ['Open','In Progress','Need Clarification','Done','Closed'];
-    if (isAssignee) return ['In Progress','Not Possible','Need Clarification','Pending Approval'];
-    if (isCreator) return [ticket.status, 'Pending Approval'];
+    if (isSuperAdmin || isOpsAdmin) return ['Open', 'Assigned', 'In Progress', 'Need Clarification', 'Pending Approval', 'Not Possible', 'Done', 'Closed'];
+    if (isAssignee) return [ticket.status, 'In Progress', 'Need Clarification', 'Pending Approval', 'Not Possible'];
     return [ticket.status];
   };
 
@@ -967,10 +750,10 @@ const TicketsList = ({ role, onTicketCreated }) => {
       {/* Manage Ticket Modal */}
       {isManageOpen && currentTicket && (
         <div className="tl-overlay" onClick={e => e.target === e.currentTarget && setIsManageOpen(false)}>
-          <div className="tl-modal">
+          <div className="tl-modal manage-wide">
             <div className="tl-modal-accent" />
             <div className="tl-modal-header">
-              <div className="tl-modal-title">Manage Ticket</div>
+              <div className="tl-modal-title">Manage Ticket #{currentTicket.ticketId || currentTicket._id.slice(-6).toUpperCase()}</div>
               <button className="tl-modal-close" onClick={() => setIsManageOpen(false)}>
                 <Ico d="M18 6L6 18 M6 6l12 12" size={14} />
               </button>
@@ -979,6 +762,7 @@ const TicketsList = ({ role, onTicketCreated }) => {
               {/* Ticket preview */}
               <div className="tl-preview">
                 <div className="tl-preview-title">{currentTicket.title}</div>
+                <div style={{ fontSize: '.8rem', color: '#64748b', marginBottom: '.6rem' }}>{currentTicket.description}</div>
                 <div className="tl-preview-badges">
                   {[PRIORITY_CFG[currentTicket.priority], STATUS_CFG[currentTicket.status]].map((cfg, i) => cfg && (
                     <span key={i} className="tl-badge" style={{ background:cfg.bg, border:`1px solid ${cfg.border}`, color:cfg.text, fontSize:'.66rem' }}>
@@ -986,43 +770,131 @@ const TicketsList = ({ role, onTicketCreated }) => {
                       {i === 0 ? currentTicket.priority : currentTicket.status}
                     </span>
                   ))}
+                  {currentTicket.assetId && (
+                    <span className="tl-badge" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#a5b4fc', cursor: 'pointer' }} onClick={() => navigate(`/asset/${currentTicket.assetId._id || currentTicket.assetId}`)}>
+                      🖥️ Linked Asset: {currentTicket.assetId.name || 'View Profile'}
+                    </span>
+                  )}
                 </div>
               </div>
 
-              <form onSubmit={handleManage}>
-                <div className="tl-field">
-                  <label className="tl-label">Update Status</label>
-                  <div className="tl-select-wrap">
-                    <select className="tl-select" value={manageForm.status} onChange={e => setM('status', e.target.value)}>
-                      {getStatusOpts(currentTicket).map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
-                  </div>
-                </div>
-
-                {isAdminOrOps && (
-                  <div className="tl-field">
-                    <label className="tl-label">Assign To</label>
-                    <div className="tl-select-wrap">
-                      <select className="tl-select" value={manageForm.assignedTo} onChange={e => setM('assignedTo', e.target.value)}>
-                        <option value="">Unassigned</option>
-                        {users.map(u => <option key={u._id} value={u._id}>{u.name} ({u.role}) · {u.department?.name || 'No dept'}</option>)}
-                      </select>
+              <div className="tl-manage-grid">
+                {/* Left Column: Form */}
+                <div className="tl-manage-col-left">
+                  <form onSubmit={handleManage}>
+                    <div className="tl-field">
+                      <label className="tl-label">Update Status</label>
+                      <div className="tl-select-wrap">
+                        <select className="tl-select" value={manageForm.status} onChange={e => setM('status', e.target.value)}>
+                          {getStatusOpts(currentTicket).map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                      </div>
                     </div>
+
+                    {isAdminOrOps && (
+                      <>
+                        <div className="tl-field">
+                          <label className="tl-label">Assign Department</label>
+                          <div className="tl-select-wrap">
+                            <select className="tl-select" value={manageForm.assignedDepartment} onChange={e => setM('assignedDepartment', e.target.value)}>
+                              <option value="">Unassigned</option>
+                              {departments.map(d => <option key={d._id} value={d._id}>{d.name}</option>)}
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="tl-field">
+                          <label className="tl-label">Assign Technician</label>
+                          <div className="tl-select-wrap">
+                            <select className="tl-select" value={manageForm.assignedTo} onChange={e => setM('assignedTo', e.target.value)}>
+                              <option value="">Unassigned</option>
+                              {users.map(u => <option key={u._id} value={u._id}>{u.name} ({u.role}) · {u.department?.name || 'No dept'}</option>)}
+                            </select>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    <div className="tl-field">
+                      <label className="tl-label">Remarks / Resolution</label>
+                      <textarea className="tl-textarea" placeholder="Add resolution details or notes…" value={manageForm.remarks} onChange={e => setM('remarks', e.target.value)} />
+                    </div>
+
+                    <div className="tl-modal-footer" style={{ padding: 0 }}>
+                      <button type="button" className="tl-cancel-btn" onClick={() => setIsManageOpen(false)}>Cancel</button>
+                      <button type="submit" className="tl-save-btn" disabled={saving}>
+                        {saving ? <><span className="tl-spinner" /> Updating…</> : <><Ico d="M20 6L9 17l-5-5" size={15} /> Update Ticket</>}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
+                {/* Right Column: Collaboration & Activity timeline */}
+                <div className="tl-manage-col-right">
+                  <div className="tl-modal-tabs">
+                    <button type="button" className={`tl-modal-tab-btn${modalTab === 'comments' ? ' active' : ''}`} onClick={() => setModalTab('comments')}>
+                      💬 Comments ({comments.length})
+                    </button>
+                    <button type="button" className={`tl-modal-tab-btn${modalTab === 'activity' ? ' active' : ''}`} onClick={() => setModalTab('activity')}>
+                      ⏱️ Activity Log ({activities.length})
+                    </button>
                   </div>
-                )}
 
-                <div className="tl-field">
-                  <label className="tl-label">Remarks / Resolution</label>
-                  <textarea className="tl-textarea" placeholder="Add resolution details or notes…" value={manageForm.remarks} onChange={e => setM('remarks', e.target.value)} />
-                </div>
+                  {modalTab === 'comments' && (
+                    <div style={{ display:'flex', flexDirection:'column', flexGrow:1 }}>
+                      <div className="tl-comments-list">
+                        {loadingComments ? (
+                          <div style={{fontSize:'.75rem',color:'#64748b'}}>Loading comments...</div>
+                        ) : comments.length === 0 ? (
+                          <div style={{fontSize:'.75rem',color:'#475569',textAlign:'center',padding:'1.5rem'}}>No comments yet. Start the conversation!</div>
+                        ) : comments.map(c => (
+                          <div key={c._id} className="tl-comment-item">
+                            <div className="tl-comment-meta">
+                              <span>{c.userId?.name || 'User'} ({c.userId?.role || 'Staff'})</span>
+                              <span>{new Date(c.createdAt).toLocaleTimeString()}</span>
+                            </div>
+                            <div className="tl-comment-text">{c.content}</div>
+                            {c.attachment && (
+                              <div style={{marginTop:'.35rem', fontSize:'.7rem'}}>
+                                📎 <a href={`http://localhost:5000${c.attachment}`} target="_blank" rel="noreferrer" style={{color:'#10b981',textDecoration:'none'}}>View Attachment</a>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      <form onSubmit={handleAddComment} className="tl-comment-form">
+                        <div className="tl-comment-input-row">
+                          <input className="tl-input" placeholder="Type a comment…" value={commentContent} onChange={e => setCommentContent(e.target.value)} />
+                          <button type="submit" className="tl-raise-btn" style={{padding:'0 .8rem', borderRadius:'10px', boxShadow:'none'}} disabled={!commentContent.trim() && !commentFile}>Post</button>
+                        </div>
+                        <div className="tl-comment-file-zone" onClick={() => commentFileRef.current?.click()}>
+                          <input ref={commentFileRef} type="file" style={{display:'none'}} onChange={e => setCommentFile(e.target.files[0])} />
+                          {commentFile ? `📎 ${commentFile.name}` : 'Attach image/log file'}
+                        </div>
+                      </form>
+                    </div>
+                  )}
 
-                <div className="tl-modal-footer">
-                  <button type="button" className="tl-cancel-btn" onClick={() => setIsManageOpen(false)}>Cancel</button>
-                  <button type="submit" className="tl-save-btn" disabled={saving}>
-                    {saving ? <><span className="tl-spinner" /> Updating…</> : <><Ico d="M20 6L9 17l-5-5" size={15} /> Update</>}
-                  </button>
+                  {modalTab === 'activity' && (
+                    <div className="tl-activities-list">
+                      {loadingActivities ? (
+                        <div style={{fontSize:'.75rem',color:'#64748b'}}>Loading activities...</div>
+                      ) : activities.length === 0 ? (
+                        <div style={{fontSize:'.75rem',color:'#475569',textAlign:'center',padding:'1.5rem'}}>No activities logged.</div>
+                      ) : activities.map(act => (
+                        <div key={act._id} className="tl-activity-item">
+                          <div className="tl-activity-dot" />
+                          <div className="tl-activity-info">
+                            <span className="tl-activity-action">{act.action}</span>
+                            {act.remarks && <span className="tl-activity-remarks">"{act.remarks}"</span>}
+                            <span className="tl-activity-meta">By {act.actorId?.name || 'System'} · {new Date(act.timestamp).toLocaleString()}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </form>
+              </div>
             </div>
           </div>
         </div>
