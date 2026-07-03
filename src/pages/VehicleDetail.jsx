@@ -34,12 +34,28 @@ const VehicleDetail = () => {
     logQRScan();
   }, [id]);
 
+  const token = localStorage.getItem('token');
+
   const fetchVehicleDetails = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const res = await axios.get(`${API_BASE_URL}/vehicles/${id}/details`, { headers });
-      setData(res.data);
+      if (token) {
+        const res = await axios.get(`${API_BASE_URL}/vehicles/${id}/details`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setData(res.data);
+      } else {
+        const res = await axios.get(`${API_BASE_URL}/vehicles/qr/${id}`);
+        setData({
+          vehicle: res.data.vehicle,
+          documents: res.data.documents || [],
+          services: res.data.recentServices || [],
+          assignments: [],
+          trips: [],
+          fuel: [],
+          repairs: [],
+          incidents: []
+        });
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -152,16 +168,18 @@ const VehicleDetail = () => {
             </span>
           </div>
         </div>
-        <div className="vd-actions">
-          <button className="vd-btn-report" onClick={() => setIsReportIssueOpen(true)}>
-            <Ico d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z M12 9v4 M12 17h.01" />
-            Report Issue
-          </button>
-        </div>
+        {token && (
+          <div className="vd-actions">
+            <button className="vd-btn-report" onClick={() => setIsReportIssueOpen(true)}>
+              <Ico d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z M12 9v4 M12 17h.01" />
+              Report Issue
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="vd-tabs">
-        {['Overview', 'Documents', 'Maintenance', 'Operations'].map(t => (
+        {(token ? ['Overview', 'Documents', 'Maintenance', 'Operations'] : ['Overview', 'Documents', 'Maintenance']).map(t => (
           <button key={t} className={`vd-tab ${activeTab === t ? 'active' : ''}`} onClick={() => setActiveTab(t)}>
             {t}
           </button>

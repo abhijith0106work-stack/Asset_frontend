@@ -143,16 +143,16 @@ const STYLES = `
   .fd-meta-item {}
   .fd-meta-label {
     font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
-    color:#475569; margin-bottom:.3rem;
+    color:#94a3b8; margin-bottom:.3rem;
   }
-  .fd-meta-value { font-size:.92rem; color:#e2e8f0; font-weight:500; }
+  .fd-meta-value { font-size:.92rem; color:#cbd5e1; font-weight:500; }
 
   /* ── Description ── */
   .fd-desc-label {
     font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
-    color:#475569; margin-bottom:.5rem;
+    color:#94a3b8; margin-bottom:.5rem;
   }
-  .fd-desc-text { font-size:.95rem; line-height:1.75; color:#cbd5e1; }
+  .fd-desc-text { font-size:.95rem; line-height:1.75; color:#e2e8f0; }
 
   /* ── Divider ── */
   .fd-divider { border:none; border-top:1px solid rgba(255,255,255,.07); margin:2rem 0; }
@@ -176,7 +176,7 @@ const STYLES = `
   }
   .fd-progress-steps { display:flex; justify-content:space-between; margin-top:.6rem; }
   .fd-progress-step {
-    font-size:.7rem; color:#334155; font-weight:500;
+    font-size:.7rem; color:#64748b; font-weight:500;
     flex:1; text-align:center;
   }
   .fd-progress-step.done  { color:#6366f1; }
@@ -220,10 +220,10 @@ const STYLES = `
   .fd-tl-dot-review       { background:#1c1a09; border-color:#f59e0b; }
   .fd-tl-dot-approved     { background:#022c22; border-color:#10b981; }
   .fd-tl-dot-rejected     { background:#2a0a0a; border-color:#ef4444; }
-  .fd-tl-dot-pending      { background:#111; border-color:#334155; }
+  .fd-tl-dot-pending      { background:#111; border-color:#475569; }
 
   .fd-tl-event { font-size:.9rem; font-weight:600; color:#e2e8f0; margin-bottom:.2rem; }
-  .fd-tl-meta  { font-size:.78rem; color:#475569; }
+  .fd-tl-meta  { font-size:.78rem; color:#94a3b8; }
   .fd-tl-note  {
     margin-top:.5rem; padding:.6rem .9rem;
     background:rgba(255,255,255,.04); border-radius:8px;
@@ -242,7 +242,7 @@ const STYLES = `
   }
   .fd-loading-dots span:nth-child(2){ animation-delay:.16s; }
   .fd-loading-dots span:nth-child(3){ animation-delay:.32s; }
-  .fd-loading-text { font-size:.85rem; color:#334155; letter-spacing:.05em; }
+  .fd-loading-text { font-size:.85rem; color:#cbd5e1; letter-spacing:.05em; }
 
   /* ── Shimmer blocks ── */
   .fd-shimmer {
@@ -419,7 +419,7 @@ const FileDetail = () => {
                   {entry.action === 'approved' ? 'Approved' :
                    entry.action === 'rejected' ? 'Rejected' :
                    entry.action === 'in_review' ? 'Moved to Review' : entry.action}
-                  {entry.level && <span style={{ color:'#475569', fontWeight:400 }}> — Level {entry.level}</span>}
+                  {entry.level && <span style={{ color:'#94a3b8', fontWeight:400 }}> — Level {entry.level}</span>}
                 </div>
                 <div className="fd-tl-meta">
                   by <strong style={{ color:'#94a3b8' }}>{entry.approver?.name || 'Unknown'}</strong>
@@ -435,7 +435,7 @@ const FileDetail = () => {
                 <div className="fd-tl-dot fd-tl-dot-pending" style={{ animation: 'fd-pulse 2s ease infinite' }}>
                   <Icon d="M12 6v6l4 2" />
                 </div>
-                <div className="fd-tl-event" style={{ color:'#334155' }}>
+                <div className="fd-tl-event" style={{ color:'#cbd5e1' }}>
                   Awaiting {isWorkflow ? file.stages[file.currentStageIndex]?.name : `Level ${file.currentLevel}`} Review
                 </div>
                 <div className="fd-tl-meta">Pending approver action</div>

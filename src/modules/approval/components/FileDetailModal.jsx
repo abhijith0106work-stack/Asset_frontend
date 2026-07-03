@@ -24,9 +24,17 @@ const FileDetailModal = ({ file, isOpen, onClose }) => {
   if (!isOpen || !file) return null;
 
   let fileUrl = null;
+  let ext = '';
+  let isPdf = false;
+  let isImage = false;
+
   if (file.fileUrl) {
     const cleanPath = file.fileUrl.replace(/\\/g, '/').replace(/^\//, '');
     fileUrl = `${API_BASE_URL.replace('/api', '')}/${cleanPath}`;
+    const parts = cleanPath.split('.');
+    ext = parts[parts.length - 1].toLowerCase();
+    isPdf = ext === 'pdf';
+    isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext);
   }
 
   return (
@@ -37,15 +45,46 @@ const FileDetailModal = ({ file, isOpen, onClose }) => {
         <div style={{ flex: 1.2, background: '#1e293b', borderRadius: '20px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column' }}>
           <div style={{ padding: '0.8rem 1.2rem', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: '#94a3b8' }}>Document Preview</div>
           {fileUrl ? (
-            fileUrl.toLowerCase().endsWith('.pdf') ? (
+            isPdf ? (
               <iframe src={fileUrl} style={{ width: '100%', height: '100%', border: 'none' }} title="Preview" />
-            ) : (
+            ) : isImage ? (
               <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'auto', padding: '1rem' }}>
                 <img src={fileUrl} style={{ maxWidth: '100%', borderRadius: '8px' }} alt="Preview" />
               </div>
+            ) : (
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.2rem', padding: '2rem', textAlign: 'center' }}>
+                <div style={{ fontSize: '3.5rem' }}>
+                  {['doc', 'docx'].includes(ext) ? '📄' : (['xls', 'xlsx'].includes(ext) ? '📊' : '📁')}
+                </div>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: '1rem', color: 'white', marginBottom: '0.3rem' }}>{file.fileName || 'Document'}</div>
+                  <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Preview not available in browser for {ext.toUpperCase()} files.</div>
+                </div>
+                <a 
+                  href={fileUrl} 
+                  download 
+                  target="_blank" 
+                  rel="noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.65rem 1.25rem',
+                    borderRadius: '10px',
+                    background: '#6366f1',
+                    color: 'white',
+                    fontWeight: 600,
+                    fontSize: '0.85rem',
+                    textDecoration: 'none',
+                    boxShadow: '0 4px 12px rgba(99,102,241,0.25)'
+                  }}
+                >
+                  Download File
+                </a>
+              </div>
             )
           ) : (
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>No file attached</div>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>No file attached</div>
           )}
         </div>
 
@@ -80,11 +119,11 @@ const FileDetailModal = ({ file, isOpen, onClose }) => {
                     <div style={{ paddingBottom: '1rem' }}>
                       <div style={{ fontSize: '0.85rem', color: '#e2e8f0', fontWeight: 600 }}>{h.action.toUpperCase()} - Level {h.fromLevel}</div>
                       <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>By {h.actorId?.name} on {new Date(h.createdAt).toLocaleString()}</div>
-                      {h.remarks && <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.3rem', fontStyle: 'italic' }}>"{h.remarks}"</div>}
+                      {h.remarks && <div style={{ fontSize: '0.8rem', color: '#cbd5e1', marginTop: '0.3rem', fontStyle: 'italic' }}>"{h.remarks}"</div>}
                     </div>
                   </div>
                 ))}
-                {history.length === 0 && !loading && <div style={{ color: '#64748b', fontSize: '0.85rem' }}>No history available yet.</div>}
+                {history.length === 0 && !loading && <div style={{ color: '#cbd5e1', fontSize: '0.85rem' }}>No history available yet.</div>}
               </div>
             </div>
 
@@ -101,7 +140,7 @@ const FileDetailModal = ({ file, isOpen, onClose }) => {
                     <div style={{ fontSize: '0.85rem', color: '#cbd5e1' }}>{c.text}</div>
                   </div>
                 ))}
-                {(file.comments || []).length === 0 && <div style={{ color: '#64748b', fontSize: '0.85rem' }}>No comments.</div>}
+                {(file.comments || []).length === 0 && <div style={{ color: '#cbd5e1', fontSize: '0.85rem' }}>No comments.</div>}
               </div>
             </div>
 

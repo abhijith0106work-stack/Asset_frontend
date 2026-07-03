@@ -444,7 +444,7 @@ const STYLES = `
     animation:um-fadeUp .4s .05s ease both;
   }
   .um-search-wrap { position:relative;flex:1;min-width:220px; }
-  .um-search-ico  { position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:#334155;pointer-events:none; }
+  .um-search-ico  { position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:#64748b;pointer-events:none; }
   .um-search {
     width:100%;padding:.65rem 1rem .65rem 2.5rem;
     background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
@@ -452,12 +452,12 @@ const STYLES = `
     outline:none;transition:border-color .2s,box-shadow .2s;
   }
   .um-search:focus { border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.1); }
-  .um-search::placeholder { color:#1e293b; }
+  .um-search::placeholder { color:#cbd5e1; }
 
   .um-filter-wrap { position:relative; }
   .um-filter-wrap::after {
     content:'';position:absolute;right:.8rem;top:50%;transform:translateY(-50%);
-    border-left:5px solid transparent;border-right:5px solid transparent;border-top:5px solid #334155;
+    border-left:5px solid transparent;border-right:5px solid transparent;border-top:5px solid #475569;
     pointer-events:none;
   }
   .um-filter {
@@ -470,7 +470,7 @@ const STYLES = `
   .um-filter option { background:#0f172a; }
 
   /* results count */
-  .um-count { font-size:.75rem;color:#334155;font-family:'DM Mono',monospace;white-space:nowrap; }
+  .um-count { font-size:.75rem;color:#94a3b8;font-family:'DM Mono',monospace;white-space:nowrap; }
 
   /* ── Grid ── */
   .um-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.2rem; }
@@ -499,7 +499,7 @@ const STYLES = `
     font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;color:#fff;
   }
   .um-name { font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:#f1f5f9;margin-bottom:.15rem; }
-  .um-email { font-size:.76rem;color:#334155;font-family:'DM Mono',monospace; }
+  .um-email { font-size:.76rem;color:#94a3b8;font-family:'DM Mono',monospace; }
   .um-designation { font-size:.76rem;color:#6366f1;margin-top:.2rem;font-weight:500; }
 
   /* meta */
@@ -512,9 +512,8 @@ const STYLES = `
   }
   .um-role-dot { width:6px;height:6px;border-radius:50%;animation:um-pulse 2.2s ease infinite; }
 
-  .um-detail { display:flex;align-items:center;gap:.5rem;font-size:.78rem;color:#475569; }
-  .um-detail svg { color:#334155;flex-shrink:0; }
-  .um-detail-val { color:#64748b; }
+  .um-detail svg { color:#94a3b8;flex-shrink:0; }
+  .um-detail-val { color:#cbd5e1; }
 
   /* module chips */
   .um-modules { display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.3rem; }
@@ -524,7 +523,7 @@ const STYLES = `
     font-family:'DM Mono',monospace;
   }
   .um-mod-on  { background:rgba(99,102,241,.12);color:#818cf8;border:1px solid rgba(99,102,241,.25); }
-  .um-mod-off { background:rgba(255,255,255,.03);color:#1e293b;border:1px solid rgba(255,255,255,.06); }
+  .um-mod-off { background:rgba(255,255,255,.03);color:#cbd5e1;border:1px solid rgba(255,255,255,.06); }
 
   /* card footer */
   .um-card-footer { display:flex;gap:.6rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,.05); }
@@ -543,6 +542,14 @@ const STYLES = `
   }
   .um-del-btn:hover { background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.4); }
 
+  .um-reset-btn {
+    flex:1;display:flex;align-items:center;justify-content:center;gap:.35rem;
+    padding:.5rem;border-radius:9px;cursor:pointer;
+    border:1px solid rgba(245,158,11,.22);background:rgba(245,158,11,.08);
+    color:#fbbf24;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;transition:all .18s;
+  }
+  .um-reset-btn:hover { background:rgba(245,158,11,.18);border-color:rgba(245,158,11,.4); }
+
   /* ── Empty / forbidden ── */
   .um-empty, .um-forbidden {
     text-align:center;padding:4rem 2rem;
@@ -550,8 +557,8 @@ const STYLES = `
     animation:um-fadeUp .4s ease both;
   }
   .um-empty-icon { font-size:2.4rem;opacity:.3;margin-bottom:.8rem; }
-  .um-empty-title { font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:#334155;margin-bottom:.35rem; }
-  .um-empty-sub   { font-size:.82rem;color:#1e293b; }
+  .um-empty-title { font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:#f8fafc;margin-bottom:.35rem; }
+  .um-empty-sub   { font-size:.82rem;color:#cbd5e1; }
 
   /* ── OVERLAY ── */
   .um-overlay {
@@ -580,7 +587,7 @@ const STYLES = `
   .um-modal-title { font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:#f8fafc; }
   .um-modal-close {
     width:30px;height:30px;border-radius:8px;border:1px solid rgba(255,255,255,.09);
-    background:rgba(255,255,255,.04);color:#64748b;cursor:pointer;
+    background:rgba(255,255,255,.04);color:#cbd5e1;cursor:pointer;
     display:flex;align-items:center;justify-content:center;transition:all .18s;
   }
   .um-modal-close:hover { background:rgba(255,255,255,.08);color:#94a3b8; }
@@ -591,7 +598,7 @@ const STYLES = `
   .um-field { margin-bottom:1.1rem; }
   .um-label {
     display:block;font-size:.7rem;font-weight:600;letter-spacing:.1em;
-    text-transform:uppercase;color:#334155;margin-bottom:.42rem;
+    text-transform:uppercase;color:#cbd5e1;margin-bottom:.42rem;
   }
   .um-input, .um-select {
     width:100%;padding:.78rem 1rem;
@@ -601,15 +608,15 @@ const STYLES = `
     transition:border-color .2s,box-shadow .2s;appearance:none;
   }
   .um-input:focus,.um-select:focus { border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.12); }
-  .um-input::placeholder { color:#1e293b; }
+  .um-input::placeholder { color:#cbd5e1; }
   .um-select option { background:#0a0e1a; }
   .um-select-wrap { position:relative; }
   .um-select-wrap::after {
     content:'';position:absolute;right:.9rem;top:50%;transform:translateY(-50%);
-    border-left:5px solid transparent;border-right:5px solid transparent;border-top:5px solid #334155;
+    border-left:5px solid transparent;border-right:5px solid transparent;border-top:5px solid #475569;
     pointer-events:none;
   }
-  .um-hint { font-size:.7rem;color:#334155;margin-top:.3rem; }
+  .um-hint { font-size:.7rem;color:#cbd5e1;margin-top:.3rem; }
 
   /* modules section */
   .um-modules-section {
@@ -628,7 +635,7 @@ const STYLES = `
     cursor:pointer;transition:background .18s;
   }
   .um-toggle-row:hover { background:rgba(255,255,255,.06); }
-  .um-toggle-name { font-size:.82rem;font-weight:500;color:#94a3b8; }
+  .um-toggle-name { font-size:.82rem;font-weight:500;color:#cbd5e1; }
   .um-toggle-track {
     width:34px;height:18px;border-radius:99px;flex-shrink:0;
     position:relative;transition:background .22s;
@@ -643,7 +650,7 @@ const STYLES = `
   .um-modal-footer { display:flex;gap:.8rem;margin-top:1.4rem; }
   .um-cancel-btn {
     flex:1;padding:.75rem;border-radius:11px;border:1px solid rgba(255,255,255,.09);
-    background:rgba(255,255,255,.04);color:#64748b;
+    background:rgba(255,255,255,.04);color:#cbd5e1;
     font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;cursor:pointer;transition:all .18s;
   }
   .um-cancel-btn:hover { background:rgba(255,255,255,.08);color:#94a3b8; }
@@ -719,6 +726,10 @@ const UsersManagement = ({ role }) => {
   const [search, setSearch]         = useState('');
   const [filterRole, setFilterRole] = useState('All');
   const [filterCompany, setFilterCompany] = useState('All');
+
+  const [resetPasswordUser, setResetPasswordUser] = useState(null);
+  const [resetPassword, setResetPassword]         = useState('');
+  const [resetting, setResetting]                 = useState(false);
 
   const [formData, setFormData] = useState({
     name:'', email:'', password:'', role:'User', company:'', department:'', designation:'', phoneNumber:'',
@@ -797,6 +808,26 @@ const UsersManagement = ({ role }) => {
       await axios.delete(`${API_BASE_URL}/users/${id}`, { headers: { Authorization:`Bearer ${token}` } });
       setDeleteConfirm(null); fetchUsers();
     } catch (err) { console.error(err); }
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    if (!resetPassword) return;
+    setResetting(true);
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put(`${API_BASE_URL}/users/${resetPasswordUser._id}/reset-password`, { password: resetPassword }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert(`Password for ${resetPasswordUser.name} has been reset successfully.`);
+      setResetPasswordUser(null);
+      setResetPassword('');
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Failed to reset password');
+    } finally {
+      setResetting(false);
+    }
   };
 
   const exportCSV = () => {
@@ -936,6 +967,9 @@ const UsersManagement = ({ role }) => {
                   <button className="um-edit-btn" onClick={() => openEdit(u)}>
                     <Ico d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7 M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" size={13} /> Edit
                   </button>
+                  <button className="um-reset-btn" onClick={() => { setResetPasswordUser(u); setResetPassword(''); }}>
+                    <Ico d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.778-7.778zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" size={13} /> Reset
+                  </button>
                   <button className="um-del-btn" onClick={() => setDeleteConfirm(u)}>
                     <Ico d="M3 6h18 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" size={13} /> Delete
                   </button>
@@ -1061,6 +1095,47 @@ const UsersManagement = ({ role }) => {
             <div className="um-confirm-foot">
               <button className="um-cancel-btn" onClick={() => setDeleteConfirm(null)}>Cancel</button>
               <button className="um-confirm-del" onClick={() => handleDelete(deleteConfirm._id)}>Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Password Modal */}
+      {resetPasswordUser && (
+        <div className="um-overlay" onClick={e => e.target === e.currentTarget && setResetPasswordUser(null)}>
+          <div className="um-modal" style={{ maxWidth: '400px' }}>
+            <div className="um-modal-accent" style={{ background: 'linear-gradient(90deg, #fbbf24, #f59e0b)' }} />
+            <div className="um-modal-header">
+              <div className="um-modal-title">Reset Password</div>
+              <button className="um-modal-close" onClick={() => setResetPasswordUser(null)}>
+                <Ico d="M18 6L6 18 M6 6l12 12" size={14} />
+              </button>
+            </div>
+            <div className="um-modal-body">
+              <form onSubmit={handleResetPassword}>
+                <div style={{ marginBottom: '1.25rem', fontSize: '0.85rem', color: '#94a3b8' }}>
+                  Set a new password for <strong>{resetPasswordUser.name}</strong> ({resetPasswordUser.email}).
+                </div>
+                <div className="um-field" style={{ marginBottom: '1.5rem' }}>
+                  <label className="um-label">New Password</label>
+                  <input
+                    className="um-input"
+                    type="password"
+                    placeholder="Enter new password"
+                    value={resetPassword}
+                    onChange={e => setResetPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    autoFocus
+                  />
+                </div>
+                <div className="um-modal-footer">
+                  <button type="button" className="um-cancel-btn" onClick={() => setResetPasswordUser(null)}>Cancel</button>
+                  <button type="submit" className="um-save-btn" style={{ background: 'linear-gradient(135deg, #fbbf24, #f59e0b)' }} disabled={resetting}>
+                    {resetting ? <><span className="um-spinner" /> Resetting…</> : 'Reset Password'}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>

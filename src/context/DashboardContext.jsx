@@ -9,12 +9,12 @@ export const DashboardProvider = ({ children }) => {
   const storedUser = JSON.parse(localStorage.getItem('user')) || {};
   const [user, setUser] = useState(storedUser);
   const [isDark, setIsDark] = useState(() => {
-    const saved = localStorage.getItem('theme');
-    return saved ? saved === 'dark' : true;
+    const saved = localStorage.getItem('app_theme');
+    return saved ? saved === 'dark' : false;
   });
 
   useEffect(() => {
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    localStorage.setItem('app_theme', isDark ? 'dark' : 'light');
     document.documentElement.classList.toggle('light-mode', !isDark);
     // also set a CSS variable for background etc. – existing styles already use var(--bg-card)
   }, [isDark]);

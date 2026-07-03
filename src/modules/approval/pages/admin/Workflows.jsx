@@ -274,7 +274,7 @@ const Workflows = () => {
                   <option value="">Global / All Departments</option>
                   {departments.map(d => <option key={d._id} value={d._id}>{d.name}</option>)}
                 </select>
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'block' }}>
+                <span style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '0.25rem', display: 'block' }}>
                   If left empty, this template can be selected by any department.
                 </span>
               </div>
@@ -550,7 +550,7 @@ const Workflows = () => {
         
         .wf-temp-title { font-family: 'Syne', sans-serif; font-size: 1.15rem; font-weight: 700; color: var(--text-main); }
         .wf-temp-dept { font-size: 0.72rem; color: var(--accent); font-weight: 600; text-transform: uppercase; margin-bottom: 0.65rem; }
-        .wf-temp-desc { font-size: 0.83rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1.2rem; flex-grow: 1; }
+        .wf-temp-desc { font-size: 0.83rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 1.2rem; flex-grow: 1; }
         
         .wf-temp-stats {
           display: flex; gap: 1rem; border-top: 1px solid var(--border);
@@ -650,7 +650,7 @@ const Workflows = () => {
         .wf-add-approver-btn:hover { color: #818cf8; }
         
         .wf-remove-app-btn {
-          background: transparent; border: none; color: var(--text-muted); cursor: pointer;
+          background: transparent; border: none; color: #cbd5e1; cursor: pointer;
           font-size: 0.8rem; padding: 0.2rem;
         }
         .wf-remove-app-btn:hover:not(:disabled) { color: #ef4444; }

@@ -206,7 +206,7 @@ const STYLES = `
     background-size:200%; -webkit-background-clip:text; -webkit-text-fill-color:transparent;
     animation:pa-gradShift 3s ease infinite;
   }
-  .pa-level-label { font-size:.62rem; text-transform:uppercase; letter-spacing:.1em; color:#334155; }
+  .pa-level-label { font-size:.62rem; text-transform:uppercase; letter-spacing:.1em; color:#cbd5e1; }
 
   /* ── Action button ── */
   .pa-action-btn {

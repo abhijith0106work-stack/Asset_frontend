@@ -340,7 +340,8 @@ const AssetDetail = () => {
   const [asset, setAsset] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState('history');
+  const token = localStorage.getItem('token');
+  const [activeTab, setActiveTab] = useState(token ? 'history' : 'maintenance');
   const user = JSON.parse(localStorage.getItem('user')) || {};
   const isAdmin = user.role === 'Super Admin' || user.role === 'Admin';
 
@@ -380,10 +381,9 @@ const AssetDetail = () => {
 
   const fetchAsset = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get(`${API_BASE_URL}/assets/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const url = token ? `${API_BASE_URL}/assets/${id}` : `${API_BASE_URL}/assets/qr/${id}`;
+      const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+      const res = await axios.get(url, config);
       setAsset(res.data);
     } catch (err) {
       if (err.response && err.response.status === 404) {
@@ -551,9 +551,11 @@ const AssetDetail = () => {
 
   return (
     <div className="ad-root">
-      <button onClick={() => navigate('/dashboard')} className="ad-back-btn">
-        ← Back to Dashboard
-      </button>
+      {token && (
+        <button onClick={() => navigate('/dashboard')} className="ad-back-btn">
+          ← Back to Dashboard
+        </button>
+      )}
 
       {/* Header Profile Section */}
       <div className="ad-header-card">
@@ -609,16 +611,18 @@ const AssetDetail = () => {
               </div>
             )}
           </div>
-          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button onClick={generateAndDownloadQR} className="ad-qr-btn" disabled={qrGenerating}>
-              {qrGenerating ? 'Generating...' : (asset.qrLabelImage ? 'Regenerate QR' : '⬇ Generate QR Label')}
-            </button>
-            {asset.qrLabelImage && (
-              <button onClick={printLabel} className="ad-qr-btn" style={{ background: 'rgba(16,185,129,0.12)', borderColor: 'rgba(16,185,129,0.3)', color: '#34d399' }}>
-                🖨 Print Label
+          {token && (
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button onClick={generateAndDownloadQR} className="ad-qr-btn" disabled={qrGenerating}>
+                {qrGenerating ? 'Generating...' : (asset.qrLabelImage ? 'Regenerate QR' : '⬇ Generate QR Label')}
               </button>
-            )}
-          </div>
+              {asset.qrLabelImage && (
+                <button onClick={printLabel} className="ad-qr-btn" style={{ background: 'rgba(16,185,129,0.12)', borderColor: 'rgba(16,185,129,0.3)', color: '#34d399' }}>
+                  🖨 Print Label
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -667,22 +671,41 @@ const AssetDetail = () => {
             </span>
           </div>
         </div>
+
+        {/* Custom Specifications */}
+        {asset.customFields && Object.keys(asset.customFields).length > 0 && (
+          <div className="ad-panel" style={{ gridColumn: '1 / -1' }}>
+            <h3 className="ad-panel-title">⚙️ Custom Specifications</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem 2rem' }}>
+              {Object.entries(asset.customFields).map(([key, val]) => (
+                <div className="ad-info-row" key={key} style={{ margin: 0, paddingBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                  <span className="ad-info-label" style={{ textTransform: 'capitalize' }}>{key}</span>
+                  <span className="ad-info-value" style={{ fontWeight: '500', color: '#f8fafc' }}>{val || '—'}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Tabs Layout */}
       <div className="ad-tabs-nav">
-        <button className={`ad-tab-trigger ${activeTab === 'history' ? 'active' : ''}`} onClick={() => setActiveTab('history')}>
-          📜 Assignment History
-        </button>
+        {token && (
+          <button className={`ad-tab-trigger ${activeTab === 'history' ? 'active' : ''}`} onClick={() => setActiveTab('history')}>
+            📜 Assignment History
+          </button>
+        )}
         <button className={`ad-tab-trigger ${activeTab === 'maintenance' ? 'active' : ''}`} onClick={() => setActiveTab('maintenance')}>
           🔧 Maintenance History
         </button>
         <button className={`ad-tab-trigger ${activeTab === 'photos' ? 'active' : ''}`} onClick={() => setActiveTab('photos')}>
           🖼️ Photos & Labels ({asset.images?.length || 0})
         </button>
-        <button className={`ad-tab-trigger ${activeTab === 'issue' ? 'active' : ''}`} onClick={() => setActiveTab('issue')}>
-          ⚠️ Report Problem
-        </button>
+        {token && (
+          <button className={`ad-tab-trigger ${activeTab === 'issue' ? 'active' : ''}`} onClick={() => setActiveTab('issue')}>
+            ⚠️ Report Problem
+          </button>
+        )}
       </div>
 
       {/* Tab Content Panels */}

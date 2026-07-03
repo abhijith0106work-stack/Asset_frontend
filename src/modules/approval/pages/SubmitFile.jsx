@@ -623,7 +623,7 @@ const SubmitFile = ({ onBack }) => {
               <div className="sf-drop-file">
                 <Icon d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6" size={18} />
                 {file.name}
-                <span style={{ color:'#475569', fontWeight:400, fontSize:'.75rem' }}>
+                <span style={{ color:'#94a3b8', fontWeight:400, fontSize:'.75rem' }}>
                   ({(file.size / 1024).toFixed(0)} KB)
                 </span>
               </div>

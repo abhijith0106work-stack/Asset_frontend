@@ -1710,6 +1710,7 @@
 
 import { API_BASE_URL } from '../config';
 import React, { useState, useEffect, useRef } from 'react';
+import logoImg from '../../Assets/logo.png';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import AssetsList from '../components/AssetsList';
@@ -2107,8 +2108,41 @@ const Dashboard = () => {
   const [loadingActivities, setLoadingActivities] = useState(true);
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('theme');
-    return saved ? saved === 'dark' : true;
+    return saved ? saved === 'dark' : false;
   });
+
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [resettingSelf, setResettingSelf] = useState(false);
+  const [resetError, setResetError] = useState('');
+
+  const handleSelfResetPassword = async (e) => {
+    e.preventDefault();
+    setResetError('');
+    if (newPassword !== confirmPassword) {
+      setResetError('Passwords do not match');
+      return;
+    }
+    setResettingSelf(true);
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put(`${API_BASE_URL}/users/me/password`, { currentPassword, newPassword }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert('Your password has been changed successfully.');
+      setShowResetModal(false);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err) {
+      console.error(err);
+      setResetError(err.response?.data?.message || 'Failed to change password');
+    } finally {
+      setResettingSelf(false);
+    }
+  };
 
   useEffect(() => {
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
@@ -2226,7 +2260,7 @@ const Dashboard = () => {
       <header className="db-topbar">
         <div className="db-brand">
           <div className="db-logo-wrap">
-            <img className="db-logo-img" src="../Assets/logo.png" alt="Logo"
+            <img className="db-logo-img" src={logoImg} alt="Logo"
               onError={e => { e.target.style.display='none'; e.target.nextSibling.style.display='block'; }} />
             <span className="db-logo-fb">A</span>
           </div>
@@ -2244,7 +2278,12 @@ const Dashboard = () => {
           </button>
 
           {/* User pill */}
-          <div className="db-user-pill">
+          <div 
+            className="db-user-pill" 
+            onClick={() => { setShowResetModal(true); setResetError(''); }} 
+            style={{ cursor: 'pointer' }}
+            title="Change Password"
+          >
             <div className="db-avatar">
               {user.name?.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase()}
             </div>
@@ -2376,6 +2415,98 @@ const Dashboard = () => {
         {activeTab === 'Departments'  && isAdmin && <Departments />}
         {activeTab === 'File Approval' && <ApprovalDashboard />}
       </main>
+
+      {showResetModal && (
+        <div className="um-overlay" onClick={e => e.target === e.currentTarget && setShowResetModal(false)}>
+          <div className="um-modal" style={{ maxWidth: '400px' }}>
+            <style>{`
+              .um-overlay {
+                position: fixed; inset: 0; background: rgba(0,0,0,.78); backdrop-filter: blur(8px);
+                display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 1rem;
+                animation: um-overlayIn .2s ease both;
+              }
+              .um-modal {
+                background: #0d1117; border: 1px solid rgba(255,255,255,.09);
+                border-radius: 24px; width: 100%; maxWidth: 400px;
+                box-shadow: 0 30px 70px rgba(0,0,0,.6); position: relative;
+                animation: um-modalIn .3s cubic-bezier(.22,1,.36,1) both;
+              }
+              .self-pw-field { margin-bottom: 1.1rem; }
+              .self-pw-label { display: block; font-size: .7rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #cbd5e1; margin-bottom: .42rem; }
+              .self-pw-input { width: 100%; padding: .78rem 1rem; background: #0a0e1a; border: 1px solid rgba(255,255,255,.08); border-radius: 11px; color: #e2e8f0; font-family: 'DM Sans', sans-serif; font-size: .88rem; outline: none; transition: border-color .2s, box-shadow .2s; }
+              .self-pw-input:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,.12); }
+              .self-pw-error { color: #fca5a5; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px; padding: 0.75rem; margin-bottom: 1rem; font-size: 0.8rem; }
+              @keyframes um-overlayIn { from { opacity: 0; } to { opacity: 1; } }
+              @keyframes um-modalIn { from { opacity: 0; transform: translateY(18px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+            `}</style>
+            <div className="um-modal-accent" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2.5px', background: 'linear-gradient(90deg, #6366f1, #8b5cf6, #06b6d4)', borderRadius: '24px 24px 0 0' }} />
+            <div className="um-modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.8rem 2rem 0', marginBottom: '1.6rem' }}>
+              <div className="um-modal-title" style={{ fontFamily: 'Syne, sans-serif', fontSize: '1.1rem', fontWeight: 800, color: '#f8fafc' }}>Change Password</div>
+              <button className="um-modal-close" onClick={() => setShowResetModal(false)} style={{ width: '30px', height: '30px', borderRadius: '8px', border: '1px solid rgba(255,255,255,.09)', background: 'rgba(255,255,255,.04)', color: '#cbd5e1', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .18s' }}>
+                ✕
+              </button>
+            </div>
+            <div className="um-modal-body" style={{ padding: '0 2rem 2rem' }}>
+              <form onSubmit={handleSelfResetPassword}>
+                {resetError && <div className="self-pw-error">{resetError}</div>}
+                
+                <div className="self-pw-field">
+                  <label className="self-pw-label">Current Password</label>
+                  <input
+                    className="self-pw-input"
+                    type="password"
+                    placeholder="••••••••"
+                    value={currentPassword}
+                    onChange={e => setCurrentPassword(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="self-pw-field">
+                  <label className="self-pw-label">New Password</label>
+                  <input
+                    className="self-pw-input"
+                    type="password"
+                    placeholder="••••••••"
+                    value={newPassword}
+                    onChange={e => setNewPassword(e.target.value)}
+                    required
+                    minLength={6}
+                  />
+                </div>
+
+                <div className="self-pw-field" style={{ marginBottom: '1.5rem' }}>
+                  <label className="self-pw-label">Confirm New Password</label>
+                  <input
+                    className="self-pw-input"
+                    type="password"
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    required
+                    minLength={6}
+                  />
+                </div>
+
+                <div className="um-modal-footer" style={{ display: 'flex', gap: '.8rem', marginTop: '1.4rem' }}>
+                  <button type="button" className="um-cancel-btn" onClick={() => setShowResetModal(false)} style={{
+                    flex: 1, padding: '.75rem', borderRadius: '11px', border: '1px solid rgba(255,255,255,.09)',
+                    background: 'rgba(255,255,255,.04)', color: '#cbd5e1', cursor: 'pointer', transition: 'all .18s'
+                  }}>Cancel</button>
+
+                  <button type="submit" className="um-save-btn" disabled={resettingSelf} style={{
+                    flex: 1, padding: '.75rem', borderRadius: '11px', border: 'none', cursor: 'pointer',
+                    background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', color: '#fff', fontWeight: 700,
+                    boxShadow: '0 4px 18px rgba(99,102,241,.38)', transition: 'all .2s'
+                  }}>
+                    {resettingSelf ? 'Saving...' : 'Change Password'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
