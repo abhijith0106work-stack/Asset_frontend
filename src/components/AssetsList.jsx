@@ -55,7 +55,7 @@ const STYLES = `
   .al-filter-wrap { position:relative; }
   .al-filter-wrap::after {
     content:'';position:absolute;right:.85rem;top:50%;transform:translateY(-50%);
-    border-left:5px solid transparent;border-right:5px solid transparent;border-top:5px solid #334155;
+    border-left:5px solid transparent;border-right:5px solid transparent;border-top:5px solid #cbd5e1;
     pointer-events:none;
   }
   .al-filter {
@@ -66,7 +66,7 @@ const STYLES = `
   }
   .al-filter:focus { border-color:#6366f1; }
   .al-filter option { background:#0f172a; }
-  .al-count { font-size:.74rem;color:#334155;font-family:'DM Mono',monospace;white-space:nowrap; }
+  .al-count { font-size:.74rem;color:#94a3b8;font-family:'DM Mono',monospace;white-space:nowrap; }
 
   /* ── Table ── */
   .al-table-wrap {
@@ -79,7 +79,7 @@ const STYLES = `
     padding:1rem 1.4rem;
     background:rgba(255,255,255,.03);
     font-size:.68rem;font-weight:600;text-transform:uppercase;
-    color:#334155;letter-spacing:.1em;
+    color:#94a3b8;letter-spacing:.1em;
     border-bottom:1px solid rgba(255,255,255,.06);
     font-family:'DM Mono',monospace;
   }
@@ -102,7 +102,7 @@ const STYLES = `
   .al-asset-thumb-fb {
     width:38px;height:38px;border-radius:10px;flex-shrink:0;
     background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
-    display:flex;align-items:center;justify-content:center;color:#475569;
+    display:flex;align-items:center;justify-content:center;color:#94a3b8;
   }
   .al-asset-uid { font-size:.65rem;color:#6366f1;font-family:'DM Mono',monospace;margin-bottom:.15rem; }
   .al-asset-name {
@@ -148,8 +148,8 @@ const STYLES = `
     animation:al-fadeUp .4s ease both;
   }
   .al-empty-icon  { font-size:2.4rem;opacity:.25;margin-bottom:.8rem; }
-  .al-empty-title { font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:#334155;margin-bottom:.35rem; }
-  .al-empty-sub   { font-size:.82rem;color:#1e293b; }
+  .al-empty-title { font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:#cbd5e1;margin-bottom:.35rem; }
+  .al-empty-sub   { font-size:.82rem;color:#94a3b8; }
 
   /* ── Skeleton rows ── */
   .al-skel-line { background:linear-gradient(90deg,rgba(255,255,255,.04) 0px,rgba(255,255,255,.09) 100px,rgba(255,255,255,.04) 200px);background-size:600px 100%;animation:al-shimmer 1.4s infinite linear;border-radius:6px; }
@@ -179,7 +179,7 @@ const STYLES = `
   .al-modal-title { font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:#f8fafc; }
   .al-modal-close {
     width:30px;height:30px;border-radius:8px;border:1px solid rgba(255,255,255,.09);
-    background:rgba(255,255,255,.04);color:#64748b;cursor:pointer;
+    background:rgba(255,255,255,.04);color:#cbd5e1;cursor:pointer;
     display:flex;align-items:center;justify-content:center;transition:all .18s;
   }
   .al-modal-close:hover { background:rgba(255,255,255,.08);color:#94a3b8; }
@@ -190,7 +190,7 @@ const STYLES = `
   .al-field { margin-bottom:1.05rem; }
   .al-label {
     display:block;font-size:.7rem;font-weight:600;letter-spacing:.1em;
-    text-transform:uppercase;color:#334155;margin-bottom:.42rem;
+    text-transform:uppercase;color:#94a3b8;margin-bottom:.42rem;
   }
   .al-input,.al-select {
     width:100%;padding:.75rem 1rem;
@@ -200,12 +200,12 @@ const STYLES = `
     transition:border-color .2s,box-shadow .2s;appearance:none;
   }
   .al-input:focus,.al-select:focus { border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.12); }
-  .al-input::placeholder { color:#1e293b; }
+  .al-input::placeholder { color:#cbd5e1; }
   .al-select option { background:#0a0e1a; }
   .al-select-wrap { position:relative; }
   .al-select-wrap::after {
     content:'';position:absolute;right:.9rem;top:50%;transform:translateY(-50%);
-    border-left:5px solid transparent;border-right:5px solid transparent;border-top:5px solid #334155;
+    border-left:5px solid transparent;border-right:5px solid transparent;border-top:5px solid #cbd5e1;
     pointer-events:none;
   }
 
@@ -226,13 +226,13 @@ const STYLES = `
   .al-img-zone.has-img{ border-color:rgba(16,185,129,.35);background:rgba(16,185,129,.05); }
   .al-img-zone input  { position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%; }
   .al-img-preview { width:72px;height:72px;object-fit:cover;border-radius:10px;display:block;margin:0 auto; }
-  .al-img-hint { font-size:.76rem;color:#334155; }
+  .al-img-hint { font-size:.76rem;color:#cbd5e1; }
 
   /* modal footer */
   .al-modal-footer { display:flex;gap:.8rem;margin-top:1.5rem; }
   .al-cancel-btn {
     flex:1;padding:.75rem;border-radius:11px;border:1px solid rgba(255,255,255,.09);
-    background:rgba(255,255,255,.04);color:#64748b;
+    background:rgba(255,255,255,.04);color:#cbd5e1;
     font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;cursor:pointer;transition:all .18s;
   }
   .al-cancel-btn:hover { background:rgba(255,255,255,.08);color:#94a3b8; }
@@ -247,6 +247,25 @@ const STYLES = `
   .al-save-btn:hover { transform:translateY(-2px);box-shadow:0 6px 24px rgba(99,102,241,.5); }
   .al-save-btn:disabled { opacity:.55;cursor:not-allowed;transform:none; }
   .al-spinner { width:15px;height:15px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:al-spin .65s linear infinite; }
+
+  /* ── QR Modal ── */
+  .al-qr-modal {
+    background:#0d1117;border:1px solid rgba(255,255,255,.09);
+    border-radius:24px;width:100%;max-width:360px;padding:2.2rem;
+    text-align:center;position:relative;
+    box-shadow:0 30px 70px rgba(0,0,0,.6);
+    animation:al-modalIn .3s cubic-bezier(.22,1,.36,1) both;
+  }
+  .al-qr-modal-accent { position:absolute;top:0;left:0;right:0;height:2.5px;background:linear-gradient(90deg,#06b6d4,#8b5cf6);border-radius:24px 24px 0 0; }
+  .al-qr-title { font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:#f8fafc;margin-bottom:1.5rem; }
+  .al-qr-btn {
+    display:flex;align-items:center;justify-content:center;gap:.35rem;
+    padding:.6rem 1rem;border-radius:10px;cursor:pointer;
+    font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;
+    border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);
+    color:#cbd5e1;text-decoration:none;transition:all .18s;
+  }
+  .al-qr-btn:hover { background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:#cbd5e1; }
 `;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -276,7 +295,8 @@ const BLANK_FORM = {
   macAddress:'', serialNumber:'', purchaseDate:'', model:'',
   subType:'', condition:'New', osVersion:'', softwareLicenses:'',
   devicePassword:'', deviceUserName:'', deviceLocation:'', company:'',
-  brand:'', warrantyProvider:'', warrantyStartDate:'', warrantyExpiryDate:''
+  brand:'', warrantyProvider:'', warrantyStartDate:'', warrantyExpiryDate:'',
+  customFields: {}
 };
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -299,6 +319,77 @@ const AssetsList = ({ role }) => {
   const [editingId, setEditingId]       = useState(null);
   const imgRef = useRef();
   const isAdmin = role === 'Super Admin' || role === 'Admin';
+  
+  const [customSchema, setCustomSchema] = useState([]);
+
+  useEffect(() => {
+    if (formData.company && companies.length > 0) {
+      const selectedComp = companies.find(c => c._id === formData.company);
+      setCustomSchema(selectedComp?.customFieldsSchema || []);
+    } else {
+      setCustomSchema([]);
+    }
+  }, [formData.company, companies]);
+
+  const setCustomField = (name, value) => {
+    setFormData(p => ({
+      ...p,
+      customFields: {
+        ...(p.customFields || {}),
+        [name]: value
+      }
+    }));
+  };
+
+  const handleAddCustomFieldSchema = async () => {
+    const fieldName = prompt("Enter the name of the new custom field:");
+    if (!fieldName || !fieldName.trim()) return;
+    const fieldType = prompt("Enter field type (text, number, date):", "text");
+    if (!['text', 'number', 'date'].includes(fieldType.toLowerCase())) {
+      return alert("Invalid type. Field creation cancelled.");
+    }
+    
+    const selectedComp = companies.find(c => c._id === formData.company);
+    if (!selectedComp) return alert("Select a company first.");
+    
+    const updatedSchema = [...(selectedComp.customFieldsSchema || []), { name: fieldName, type: fieldType.toLowerCase() }];
+    
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.put(`${API_BASE_URL}/companies/${selectedComp._id}`, {
+        customFieldsSchema: updatedSchema
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      // Update local companies list
+      setCompanies(prev => prev.map(c => c._id === selectedComp._id ? res.data : c));
+      alert(`Custom field "${fieldName}" added to company schema successfully!`);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to add custom field schema.");
+    }
+  };
+
+  const handleRemoveCustomFieldSchema = async (fieldName) => {
+    if (!window.confirm(`Are you sure you want to delete the custom field "${fieldName}" from the company schema?`)) return;
+    const selectedComp = companies.find(c => c._id === formData.company);
+    if (!selectedComp) return;
+    const updatedSchema = (selectedComp.customFieldsSchema || []).filter(f => f.name !== fieldName);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.put(`${API_BASE_URL}/companies/${selectedComp._id}`, {
+        customFieldsSchema: updatedSchema
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setCompanies(prev => prev.map(c => c._id === selectedComp._id ? res.data : c));
+      alert(`Custom field "${fieldName}" removed successfully!`);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to remove custom field schema.");
+    }
+  };
 
   useEffect(() => {
     const el = document.createElement('style');
@@ -366,7 +457,8 @@ const AssetsList = ({ role }) => {
       brand: asset.brand||'',
       warrantyProvider: asset.warrantyProvider||'',
       warrantyStartDate: asset.warrantyStartDate ? asset.warrantyStartDate.split('T')[0] : '',
-      warrantyExpiryDate: asset.warrantyExpiryDate ? asset.warrantyExpiryDate.split('T')[0] : ''
+      warrantyExpiryDate: asset.warrantyExpiryDate ? asset.warrantyExpiryDate.split('T')[0] : '',
+      customFields: asset.customFields || {}
     });
     setImagePreview(asset.image ? `http://localhost:5000${asset.image}` : null);
     setImageFile(null); setIsModalOpen(true);
@@ -379,7 +471,13 @@ const AssetsList = ({ role }) => {
       const token = localStorage.getItem('token');
       const cfg = { headers:{ Authorization:`Bearer ${token}` } };
       const payload = new FormData();
-      Object.keys(formData).forEach(k => payload.append(k, formData[k]||''));
+      Object.keys(formData).forEach(k => {
+        if (k === 'customFields') {
+          payload.append(k, JSON.stringify(formData[k] || {}));
+        } else {
+          payload.append(k, formData[k]||'');
+        }
+      });
       if (imageFile) payload.append('image', imageFile);
       if (editingId) { await axios.put(`${API_BASE_URL}/assets/${editingId}`, payload, cfg); }
       else           { await axios.post(`${API_BASE_URL}/assets`, payload, cfg); }
@@ -737,6 +835,78 @@ const AssetsList = ({ role }) => {
                 </div>
               </div>
 
+              {/* Dynamic Custom Fields Section */}
+              {formData.company && (
+                <>
+                  <div className="al-section-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>Custom Specifications</span>
+                    {role === 'Super Admin' && (
+                      <button
+                        type="button"
+                        onClick={handleAddCustomFieldSchema}
+                        style={{
+                          fontSize: '0.68rem',
+                          fontFamily: 'DM Sans, sans-serif',
+                          fontWeight: '600',
+                          letterSpacing: '0.05em',
+                          textTransform: 'uppercase',
+                          background: 'rgba(99, 102, 241, 0.12)',
+                          border: '1px solid rgba(99, 102, 241, 0.28)',
+                          color: '#818cf8',
+                          padding: '0.3rem 0.6rem',
+                          borderRadius: '7px',
+                          cursor: 'pointer',
+                          marginLeft: 'auto',
+                          transition: 'all 0.15s'
+                        }}
+                      >
+                        ➕ Add Field Schema
+                      </button>
+                    )}
+                  </div>
+                  {customSchema.length > 0 ? (
+                    <div className="al-2col">
+                      {customSchema.map(field => (
+                        <div className="al-field" key={field._id || field.name}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '.42rem' }}>
+                            <label className="al-label" style={{ margin: 0 }}>{field.name}</label>
+                            {role === 'Super Admin' && (
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveCustomFieldSchema(field.name)}
+                                style={{
+                                  background: 'transparent',
+                                  border: 'none',
+                                  color: '#ef4444',
+                                  fontSize: '0.85rem',
+                                  cursor: 'pointer',
+                                  padding: '0 0.2rem',
+                                  lineHeight: 1
+                                }}
+                                title={`Delete "${field.name}" field`}
+                              >
+                                ×
+                              </button>
+                            )}
+                          </div>
+                          <input
+                            className="al-input"
+                            type={field.type === 'date' ? 'date' : (field.type === 'number' ? 'number' : 'text')}
+                            value={formData.customFields?.[field.name] || ''}
+                            onChange={e => setCustomField(field.name, e.target.value)}
+                            placeholder={`Enter ${field.name}`}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: '0.76rem', color: '#475569', fontStyle: 'italic', marginBottom: '1rem' }}>
+                      No custom specifications defined for this company. {role === 'Super Admin' && "Click 'Add Field Schema' to create one."}
+                    </div>
+                  )}
+                </>
+              )}
+
               <div className="al-section-label">Image</div>
               <div className={`al-img-zone${imagePreview ? ' has-img' : ''}`} onClick={() => imgRef.current?.click()}>
                 <input ref={imgRef} type="file" accept="image/*" onChange={handleFileChange} style={{ display:'none' }} />
@@ -765,6 +935,49 @@ const AssetsList = ({ role }) => {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* QR Modal */}
+      {qrModal && (
+        <div className="al-overlay" onClick={e => e.target === e.currentTarget && setQrModal(null)}>
+          <div className="al-qr-modal" style={{ maxWidth: '420px', padding: '1.5rem' }}>
+            <div className="al-qr-modal-accent" />
+            <div className="al-qr-title">Asset QR Label</div>
+            
+            {qrModal.loading ? (
+              <div style={{ padding: '3rem 0', color: '#cbd5e1' }}>
+                <div className="al-spinner" style={{ margin: '0 auto 1rem', width: 24, height: 24, borderColor: 'rgba(99,102,241,0.3)', borderTopColor: '#6366f1' }} />
+                Generating high-res PNG label...
+              </div>
+            ) : (
+              <>
+                <div style={{ background: '#fff', borderRadius: '12px', padding: '1rem', marginBottom: '1.5rem' }}>
+                  <img src={`${API_BASE_URL.replace('/api', '')}${qrModal.qrLabelImage}`} alt="Asset Label" style={{ width: '100%', height: 'auto', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
+                </div>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.5rem' }}>
+                  <a href={`${API_BASE_URL.replace('/api', '')}${qrModal.qrLabelImage}`} download={`Label_${qrModal.uniqueId || qrModal.name}.png`} target="_blank" rel="noreferrer" className="al-qr-btn" style={{ background: 'rgba(99,102,241,0.1)', color: '#818cf8', borderColor: 'rgba(99,102,241,0.2)' }}>
+                    <Ico d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3" /> Download Label PNG
+                  </a>
+                  <a href={`${API_BASE_URL.replace('/api', '')}${qrModal.qrImage}`} download={`QR_${qrModal.uniqueId || qrModal.name}.png`} target="_blank" rel="noreferrer" className="al-qr-btn">
+                    <Ico d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3" /> Download QR PNG
+                  </a>
+                  <button className="al-qr-btn" style={{ background: 'rgba(16,185,129,0.1)', color: '#34d399', borderColor: 'rgba(16,185,129,0.2)' }} onClick={() => {
+                    const printWindow = window.open('', '_blank');
+                    printWindow.document.write(`<html><body style="margin:0;padding:20px;text-align:center;"><img src="${API_BASE_URL.replace('/api', '')}${qrModal.qrLabelImage}" style="max-width:100%;height:auto;" onload="window.print();window.close();" /></body></html>`);
+                    printWindow.document.close();
+                  }}>
+                    <Ico d="M6 9V2h12v7 M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2 M6 14h12v8H6z" /> Print Label
+                  </button>
+                </div>
+                
+                <div className="al-modal-footer">
+                  <button className="al-cancel-btn" onClick={() => setQrModal(null)}>Close</button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

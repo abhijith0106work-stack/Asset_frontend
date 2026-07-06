@@ -416,7 +416,7 @@ const DashboardRoot = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const [activeTab, setActiveTab] = useState('Overview');
-  const [isDark, setIsDark] = useState(() => localStorage.getItem('theme') !== 'light');
+  const [isDark, setIsDark] = useState(() => localStorage.getItem('app_theme') === 'dark');
 
   // Data state
   const [kpis, setKpis] = useState({});
@@ -432,7 +432,7 @@ const DashboardRoot = () => {
 
   // Apply theme
   useEffect(() => {
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    localStorage.setItem('app_theme', isDark ? 'dark' : 'light');
     document.documentElement.classList.toggle('light-mode', !isDark);
   }, [isDark]);
 

@@ -6,9 +6,9 @@
   --bg-root: #07090f;
   --bg-card: rgba(255, 255, 255, 0.04);
   --border: rgba(255, 255, 255, 0.07);
-  --text-main: #e2e8f0;
-  --text-dim: rgba(148, 163, 184, 0.7);
-  --text-muted: rgba(148, 163, 184, 0.5);
+  --text-main: #f8fafc;
+  --text-dim: #cbd5e1;
+  --text-muted: #94a3b8;
   --accent: #6366f1;
   --accent-cyan: #06b6d4;
 }

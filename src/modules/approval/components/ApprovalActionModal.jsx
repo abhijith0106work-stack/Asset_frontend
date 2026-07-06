@@ -28,12 +28,24 @@ const ApprovalActionModal = ({ file, isOpen, onClose, onActionSuccess }) => {
   };
 
   let fileUrl = null;
+  let ext = '';
+  let isPdf = false;
+  let isImage = false;
+
+  let sourcePath = null;
   if (file.fileUrl) {
-    const cleanPath = file.fileUrl.replace(/\\/g, '/').replace(/^\//, '');
-    fileUrl = `${API_BASE_URL.replace('/api', '')}/${cleanPath}`;
+    sourcePath = file.fileUrl;
   } else if (file.attachments && file.attachments.length > 0 && file.attachments[0].url) {
-    const cleanPath = file.attachments[0].url.replace(/\\/g, '/').replace(/^\//, '');
+    sourcePath = file.attachments[0].url;
+  }
+
+  if (sourcePath) {
+    const cleanPath = sourcePath.replace(/\\/g, '/').replace(/^\//, '');
     fileUrl = `${API_BASE_URL.replace('/api', '')}/${cleanPath}`;
+    const parts = cleanPath.split('.');
+    ext = parts[parts.length - 1].toLowerCase();
+    isPdf = ext === 'pdf';
+    isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext);
   }
 
   return (
@@ -42,17 +54,48 @@ const ApprovalActionModal = ({ file, isOpen, onClose, onActionSuccess }) => {
         
         {/* Left: File Viewer */}
         <div style={{ flex: 1.5, background: '#1e293b', borderRadius: '20px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ padding: '0.8rem 1.2rem', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: '#94a3b8' }}>Document Preview - Debug URL: {fileUrl}</div>
+          <div style={{ padding: '0.8rem 1.2rem', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: '#94a3b8' }}>Document Preview</div>
           {fileUrl ? (
-            fileUrl.toLowerCase().endsWith('.pdf') ? (
+            isPdf ? (
               <iframe src={fileUrl} style={{ width: '100%', height: '100%', border: 'none' }} title="Preview" />
-            ) : (
+            ) : isImage ? (
               <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'auto', padding: '1rem' }}>
                 <img src={fileUrl} style={{ maxWidth: '100%', borderRadius: '8px' }} alt="Preview" />
               </div>
+            ) : (
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.2rem', padding: '2rem', textAlign: 'center' }}>
+                <div style={{ fontSize: '3.5rem' }}>
+                  {['doc', 'docx'].includes(ext) ? '📄' : (['xls', 'xlsx'].includes(ext) ? '📊' : '📁')}
+                </div>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: '1rem', color: 'white', marginBottom: '0.3rem' }}>{file.fileName || 'Document'}</div>
+                  <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Preview not available in browser for {ext.toUpperCase()} files.</div>
+                </div>
+                <a 
+                  href={fileUrl} 
+                  download 
+                  target="_blank" 
+                  rel="noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.65rem 1.25rem',
+                    borderRadius: '10px',
+                    background: '#6366f1',
+                    color: 'white',
+                    fontWeight: 600,
+                    fontSize: '0.85rem',
+                    textDecoration: 'none',
+                    boxShadow: '0 4px 12px rgba(99,102,241,0.25)'
+                  }}
+                >
+                  Download File
+                </a>
+              </div>
             )
           ) : (
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>No file attached</div>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>No file attached</div>
           )}
         </div>
 
@@ -68,7 +111,7 @@ const ApprovalActionModal = ({ file, isOpen, onClose, onActionSuccess }) => {
               <div style={{ fontSize: '0.8rem', color: '#818cf8', fontWeight: 600, marginBottom: '0.75rem', textTransform: 'uppercase' }}>Audit Trail</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {(file.history || []).length === 0 ? (
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>No movements yet.</div>
+                  <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>No movements yet.</div>
                 ) : (
                   file.history.map((h, i) => {
                     const stageName = file.stages && file.stages[h.stageIndex] ? file.stages[h.stageIndex].name : `Level ${h.stageIndex + 1}`;
@@ -76,7 +119,7 @@ const ApprovalActionModal = ({ file, isOpen, onClose, onActionSuccess }) => {
                       <div key={i} style={{ fontSize: '0.75rem', color: '#94a3b8', borderLeft: '2px solid rgba(129,140,248,0.3)', paddingLeft: '0.75rem' }}>
                         <div style={{ color: '#e2e8f0', fontWeight: 600 }}>{h.action.toUpperCase()} - {stageName}</div>
                         <div>{h.actorId?.name} • {new Date(h.createdAt).toLocaleDateString()}</div>
-                        {h.remarks && <div style={{ color: '#64748b', fontStyle: 'italic', marginTop: '0.2rem' }}>"{h.remarks}"</div>}
+                        {h.remarks && <div style={{ color: '#cbd5e1', fontStyle: 'italic', marginTop: '0.2rem' }}>"{h.remarks}"</div>}
                       </div>
                     );
                   })
@@ -88,7 +131,7 @@ const ApprovalActionModal = ({ file, isOpen, onClose, onActionSuccess }) => {
             <div style={{ flex: 1, background: 'rgba(255,255,255,0.02)', borderRadius: '16px', padding: '1rem', border: '1px solid rgba(255,255,255,0.05)', overflowY: 'auto', maxHeight: '200px' }}>
               <div style={{ fontSize: '0.8rem', color: '#818cf8', fontWeight: 600, marginBottom: '0.75rem' }}>Discussion History</div>
               {(file.comments || []).length === 0 ? (
-                <div style={{ fontSize: '0.8rem', color: '#64748b' }}>No comments yet.</div>
+                <div style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>No comments yet.</div>
               ) : (
                 file.comments.map((c, i) => (
                   <div key={i} style={{ marginBottom: '0.75rem', paddingBottom: '0.75rem', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
@@ -130,7 +173,7 @@ const ApprovalActionModal = ({ file, isOpen, onClose, onActionSuccess }) => {
               style={{ flex: 1.1, padding: '1rem', borderRadius: '14px', background: '#6366f1', color: 'white', border: 'none', fontWeight: 700, cursor: 'pointer' }}
             >{loading ? '...' : 'Approve'}</button>
           </div>
-          <button onClick={onClose} style={{ marginTop: '1.5rem', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '0.9rem' }}>Close Review</button>
+          <button onClick={onClose} style={{ marginTop: '1.5rem', background: 'none', border: 'none', color: '#cbd5e1', cursor: 'pointer', fontSize: '0.9rem' }}>Close Review</button>
         </div>
 
       </div>

@@ -195,11 +195,16 @@ import { approvalApi } from '../api/approvalApi';
 import FileDetailModal from '../components/FileDetailModal';
 
 const STATUS_CONFIG = {
-  approved:    { bg: 'rgba(16,185,129,0.1)',  border: 'rgba(16,185,129,0.28)',  text: '#6ee7b7', dot: '#10b981', icon: '✓', label: 'Approved' },
-  rejected:    { bg: 'rgba(239,68,68,0.1)',   border: 'rgba(239,68,68,0.28)',   text: '#fca5a5', dot: '#ef4444', icon: '✕', label: 'Rejected' },
-  submitted:   { bg: 'rgba(99,102,241,0.1)',  border: 'rgba(99,102,241,0.28)',  text: '#a5b4fc', dot: '#6366f1', icon: '⬆', label: 'Submitted' },
-  resubmitted: { bg: 'rgba(245,158,11,0.1)',  border: 'rgba(245,158,11,0.28)',  text: '#fcd34d', dot: '#f59e0b', icon: '↩', label: 'Resubmitted' },
-  pending:     { bg: 'rgba(100,116,139,0.1)', border: 'rgba(100,116,139,0.28)', text: '#94a3b8', dot: '#64748b', icon: '◌', label: 'Pending' },
+  approved:                  { bg: 'rgba(16,185,129,0.1)',  border: 'rgba(16,185,129,0.28)',  text: '#6ee7b7', dot: '#10b981', icon: '✓', label: 'Approved' },
+  rejected:                  { bg: 'rgba(239,68,68,0.1)',   border: 'rgba(239,68,68,0.28)',   text: '#fca5a5', dot: '#ef4444', icon: '✕', label: 'Rejected' },
+  changes_requested:         { bg: 'rgba(239,68,68,0.1)',   border: 'rgba(239,68,68,0.28)',   text: '#fca5a5', dot: '#ef4444', icon: '⚠', label: 'Changes Requested' },
+  submitted:                 { bg: 'rgba(99,102,241,0.1)',  border: 'rgba(99,102,241,0.28)',  text: '#a5b4fc', dot: '#6366f1', icon: '⬆', label: 'Submitted' },
+  resubmitted:               { bg: 'rgba(245,158,11,0.1)',  border: 'rgba(245,158,11,0.28)',  text: '#fcd34d', dot: '#f59e0b', icon: '↩', label: 'Resubmitted' },
+  in_review:                 { bg: 'rgba(245,158,11,0.1)',  border: 'rgba(245,158,11,0.28)',  text: '#fcd34d', dot: '#f59e0b', icon: '◌', label: 'In Review' },
+  pending_parallel_approval: { bg: 'rgba(245,158,11,0.1)',  border: 'rgba(245,158,11,0.28)',  text: '#fcd34d', dot: '#f59e0b', icon: '◌', label: 'Parallel Review' },
+  draft:                     { bg: 'rgba(100,116,139,0.1)', border: 'rgba(100,116,139,0.28)', text: '#94a3b8', dot: '#64748b', icon: '◌', label: 'Draft' },
+  archived:                  { bg: 'rgba(100,116,139,0.1)', border: 'rgba(100,116,139,0.28)', text: '#94a3b8', dot: '#64748b', icon: '◌', label: 'Archived' },
+  pending:                   { bg: 'rgba(100,116,139,0.1)', border: 'rgba(100,116,139,0.28)', text: '#94a3b8', dot: '#64748b', icon: '◌', label: 'Pending' },
 };
 
 const getStatus = (s) => STATUS_CONFIG[s] || STATUS_CONFIG['pending'];
@@ -255,13 +260,16 @@ const MyFiles = ({ onNewClick }) => {
 
   const counts = {
     all:         files.length,
-    submitted:   files.filter(f => f.status === 'submitted').length,
+    submitted:   files.filter(f => f.status === 'submitted' || f.status === 'in_review' || f.status === 'pending_parallel_approval').length,
     approved:    files.filter(f => f.status === 'approved').length,
-    rejected:    files.filter(f => f.status === 'rejected').length,
+    rejected:    files.filter(f => f.status === 'rejected' || f.status === 'changes_requested').length,
     resubmitted: files.filter(f => f.status === 'resubmitted').length,
   };
 
-  const filtered = filterStatus === 'all' ? files : files.filter(f => f.status === filterStatus);
+  const filtered = filterStatus === 'all' ? files : 
+                   filterStatus === 'submitted' ? files.filter(f => f.status === 'submitted' || f.status === 'in_review' || f.status === 'pending_parallel_approval') :
+                   filterStatus === 'rejected' ? files.filter(f => f.status === 'rejected' || f.status === 'changes_requested') :
+                   files.filter(f => f.status === filterStatus);
 
   return (
     <>
@@ -666,7 +674,7 @@ const MyFiles = ({ onNewClick }) => {
                         <button className="mf-action-btn danger" title="Delete" onClick={() => setDeleteConfirm(file)}>✕</button>
                       </>
                     )}
-                    {file.status === 'rejected' && (
+                    {(file.status === 'rejected' || file.status === 'changes_requested') && (
                       <button className="mf-resubmit-btn" onClick={() => setResubmittingId(file._id)}>
                         ↩ Resubmit
                       </button>
@@ -719,7 +727,7 @@ const MyFiles = ({ onNewClick }) => {
             <div className="mf-modal-header">
               <div style={{ display:'flex', flexDirection:'column', gap:'.15rem', minWidth:0 }}>
                 <div className="mf-modal-title">💬 Comments</div>
-                <div style={{ fontSize:'.7rem', color:'rgba(148,163,184,.45)', fontFamily:"'DM Mono',monospace", overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                <div style={{ fontSize:'.7rem', color:'#94a3b8', fontFamily:"'DM Mono',monospace", overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
                   {commentingFile.title}
                 </div>
               </div>
@@ -729,7 +737,7 @@ const MyFiles = ({ onNewClick }) => {
             <div className="mf-modal-body">
               <div className="mf-comments-list">
                 {(commentingFile.comments || []).length === 0 ? (
-                  <div style={{ textAlign:'center', padding:'2rem 0', color:'rgba(100,116,139,.5)', fontSize:'.8rem' }}>
+                  <div style={{ textAlign:'center', padding:'2rem 0', color:'#cbd5e1', fontSize:'.8rem' }}>
                     No comments yet. Be the first!
                   </div>
                 ) : (

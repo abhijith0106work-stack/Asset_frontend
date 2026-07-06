@@ -51,14 +51,14 @@ const Reports = () => {
         .rep-root { animation: repFadeUp .4s ease both; }
         .rep-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2.5rem; }
         .rep-title { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; color: #f8fafc; }
-        .rep-subtitle { color: #64748b; font-size: 0.9rem; margin-top: 0.2rem; }
+        .rep-subtitle { color: #cbd5e1; font-size: 0.9rem; margin-top: 0.2rem; }
         
         .rep-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
         .rep-card { 
           background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); 
           padding: 1.8rem; border-radius: 24px; position: relative; overflow: hidden;
         }
-        .rep-card-label { font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+        .rep-card-label { font-size: 0.75rem; font-weight: 700; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
         .rep-card-val { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; color: #f1f5f9; line-height: 1; }
         
         .rep-table-wrap { 
@@ -66,7 +66,7 @@ const Reports = () => {
           border-radius: 24px; overflow: hidden; 
         }
         .rep-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; }
-        .rep-table th { padding: 1.2rem 1.5rem; background: rgba(255,255,255,0.03); color: #475569; font-weight: 700; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em; }
+        .rep-table th { padding: 1.2rem 1.5rem; background: rgba(255,255,255,0.03); color: #cbd5e1; font-weight: 700; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em; }
         .rep-table td { padding: 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.04); color: #94a3b8; }
         .rep-table tr:hover { background: rgba(255,255,255,0.01); }
         
@@ -115,7 +115,7 @@ const Reports = () => {
       </div>
 
       <div className="rep-section">
-        <h3 style={{ marginBottom: '1.2rem', fontSize: '1rem', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Recent File Movements</h3>
+        <h3 style={{ marginBottom: '1.2rem', fontSize: '1rem', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Recent File Movements</h3>
         <div className="rep-table-wrap">
           <table className="rep-table">
             <thead>
@@ -143,7 +143,7 @@ const Reports = () => {
               ))}
               {files.length === 0 && (
                 <tr>
-                  <td colSpan="5" style={{ textAlign: 'center', padding: '3rem', color: '#334155' }}>No data available to generate reports.</td>
+                  <td colSpan="5" style={{ textAlign: 'center', padding: '3rem', color: '#cbd5e1' }}>No data available to generate reports.</td>
                 </tr>
               )}
             </tbody>

@@ -16,6 +16,19 @@ const CommonFileViewer = ({ fileId, onBack }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({ title: '', description: '', category: '', tags: '' });
   
+  const [isEditingText, setIsEditingText] = useState(false);
+  const [textContent, setTextContent] = useState(null);
+  const [editedText, setEditedText] = useState('');
+  const [savingText, setSavingText] = useState(false);
+
+  const editableExtensions = ['.txt', '.js', '.jsx', '.json', '.html', '.css', '.md', '.py', '.java', '.cpp', '.h', '.csv', '.xml', '.yaml', '.yml'];
+  const fileNameLower = file?.fileName?.toLowerCase() || '';
+  const isTextEditable = editableExtensions.some(ext => fileNameLower.endsWith(ext));
+
+  const fNameParts = file?.fileName?.split('.') || [];
+  const ext = fNameParts.length > 1 ? fNameParts[fNameParts.length - 1].toLowerCase() : '';
+  const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext);
+
   const user = JSON.parse(localStorage.getItem('user'));
   const canEditOrDelete = file?.uploadedBy?._id === user?._id || user?.role === 'Super Admin' || user?.role === 'Admin';
 
@@ -26,10 +39,60 @@ const CommonFileViewer = ({ fileId, onBack }) => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setFile(res.data);
+      
+      const fileData = res.data;
+      const fNameLower = fileData.fileName?.toLowerCase() || '';
+      const isEditable = editableExtensions.some(ext => fNameLower.endsWith(ext));
+      if (isEditable && fileData.fileUrl) {
+        const cleanUrl = fileData.fileUrl.replace(/\\/g, '/').replace(/^\//, '');
+        const fullUrl = `${API_BASE_URL.replace('/api', '')}/${cleanUrl}`;
+        axios.get(fullUrl)
+          .then(textRes => {
+            const text = typeof textRes.data === 'object' ? JSON.stringify(textRes.data, null, 2) : textRes.data;
+            setTextContent(text);
+            setEditedText(text);
+          })
+          .catch(textErr => {
+            console.error('Failed to fetch text content:', textErr);
+            setTextContent(null);
+          });
+      } else {
+        setTextContent(null);
+        setIsEditingText(false);
+      }
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveTextContent = async () => {
+    setSavingText(true);
+    try {
+      const currentVerNum = parseFloat(file.currentVersion);
+      const nextVerNum = isNaN(currentVerNum) ? '1.1' : (currentVerNum + 0.1).toFixed(1);
+      
+      const editedBlob = new Blob([editedText], { type: 'text/plain' });
+      const editedFile = new File([editedBlob], file.fileName || 'document.txt', { type: 'text/plain' });
+      
+      const token = localStorage.getItem('token');
+      const data = new FormData();
+      data.append('versionNumber', nextVerNum);
+      data.append('changeLog', `Direct edit via web editor`);
+      data.append('file', editedFile);
+
+      await axios.post(`${API_BASE_URL}/common-files/${fileId}/version`, data, {
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
+      });
+      
+      setIsEditingText(false);
+      fetchFile();
+    } catch (err) {
+      console.error(err);
+      alert('Error saving updated document content');
+    } finally {
+      setSavingText(false);
     }
   };
 
@@ -227,21 +290,113 @@ const CommonFileViewer = ({ fileId, onBack }) => {
           </div>
 
           {/* Document Preview Card */}
-          <div style={{ background: 'var(--bg-card)', borderRadius: '20px', overflow: 'hidden', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', height: '480px' }}>
-            <div style={{ padding: '0.8rem 1.2rem', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--border)', fontSize: '0.85rem', color: 'var(--text-dim)', display: 'flex', justifyContent: 'space-between' }}>
-              <span>Document Preview</span>
-              <a href={getFullFileUrl(file.fileUrl)} target="_blank" rel="noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>Open in New Tab 🡥</a>
+          <div style={{ background: 'var(--bg-card)', borderRadius: '20px', overflow: 'hidden', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', height: '520px' }}>
+            <div style={{ padding: '0.8rem 1.2rem', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--border)', fontSize: '0.85rem', color: 'var(--text-dim)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                <span>Document Preview</span>
+                {isTextEditable && canEditOrDelete && (
+                  <button 
+                    onClick={() => {
+                      if (isEditingText) {
+                        setEditedText(textContent);
+                      }
+                      setIsEditingText(!isEditingText);
+                    }}
+                    style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)', color: '#818cf8', padding: '0.2rem 0.5rem', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    {isEditingText ? 'Cancel Edit' : 'Edit Document'}
+                  </button>
+                )}
+              </div>
+              <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
+                {isEditingText && (
+                  <button 
+                    onClick={handleSaveTextContent}
+                    disabled={savingText}
+                    style={{ background: '#10b981', border: 'none', color: 'white', padding: '0.25rem 0.6rem', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    {savingText ? 'Saving...' : 'Save As New Version'}
+                  </button>
+                )}
+                <a href={getFullFileUrl(file.fileUrl)} target="_blank" rel="noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>Open in New Tab 🡥</a>
+              </div>
             </div>
-            {file.fileUrl ? (
-              file.fileUrl.toLowerCase().endsWith('.pdf') ? (
-                <iframe src={getFullFileUrl(file.fileUrl)} style={{ width: '100%', height: '100%', border: 'none' }} title="Preview" />
-              ) : (
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'auto', padding: '1rem' }}>
-                  <img src={getFullFileUrl(file.fileUrl)} style={{ maxWidth: '100%', borderRadius: '8px' }} alt="Preview" />
-                </div>
-              )
+            {isEditingText ? (
+              <textarea 
+                value={editedText}
+                onChange={e => setEditedText(e.target.value)}
+                style={{ 
+                  flex: 1, 
+                  background: 'rgba(15,23,42,0.6)', 
+                  color: '#f8fafc', 
+                  border: 'none', 
+                  outline: 'none', 
+                  padding: '1.2rem', 
+                  fontFamily: 'Space Mono, monospace', 
+                  fontSize: '0.85rem', 
+                  lineHeight: 1.6, 
+                  resize: 'none' 
+                }}
+                placeholder="Edit file contents..."
+              />
             ) : (
-              <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dim)' }}>No file attached</div>
+              file.fileUrl ? (
+                file.fileUrl.toLowerCase().endsWith('.pdf') ? (
+                  <iframe src={getFullFileUrl(file.fileUrl)} style={{ width: '100%', height: '100%', border: 'none' }} title="Preview" />
+                ) : isTextEditable && textContent !== null ? (
+                  <pre style={{ 
+                    flex: 1, 
+                    margin: 0, 
+                    padding: '1.2rem', 
+                    overflow: 'auto', 
+                    background: 'rgba(15,23,42,0.6)', 
+                    color: '#f8fafc', 
+                    fontFamily: 'Space Mono, monospace', 
+                    fontSize: '0.85rem', 
+                    lineHeight: 1.6,
+                    textAlign: 'left'
+                  }}>
+                    {textContent}
+                  </pre>
+                ) : isImage ? (
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'auto', padding: '1rem' }}>
+                    <img src={getFullFileUrl(file.fileUrl)} style={{ maxWidth: '100%', borderRadius: '8px' }} alt="Preview" />
+                  </div>
+                ) : (
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.2rem', padding: '2rem', textAlign: 'center' }}>
+                    <div style={{ fontSize: '3.5rem' }}>
+                      {['doc', 'docx'].includes(ext) ? '📄' : (['xls', 'xlsx'].includes(ext) ? '📊' : '📁')}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: '1rem', color: 'white', marginBottom: '0.3rem' }}>{file.fileName || 'Document'}</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Preview not available in browser for {ext.toUpperCase()} files.</div>
+                    </div>
+                    <a 
+                      href={getFullFileUrl(file.fileUrl)} 
+                      download 
+                      target="_blank" 
+                      rel="noreferrer"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.65rem 1.25rem',
+                        borderRadius: '10px',
+                        background: 'var(--accent)',
+                        color: 'white',
+                        fontWeight: 600,
+                        fontSize: '0.85rem',
+                        textDecoration: 'none',
+                        boxShadow: '0 4px 12px var(--accent-glow)'
+                      }}
+                    >
+                      Download File
+                    </a>
+                  </div>
+                )
+              ) : (
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dim)' }}>No file attached</div>
+              )
             )}
           </div>
 

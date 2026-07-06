@@ -15,6 +15,14 @@ export const EmployeeWorkspace = () => {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Password reset state
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [updating, setUpdating] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -168,9 +176,148 @@ export const EmployeeWorkspace = () => {
     </div>
   );
 
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    if (newPassword !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+    setUpdating(true);
+    try {
+      const cfg = authCfg();
+      await axios.put(`${API_BASE_URL}/users/me/password`, { currentPassword, newPassword }, cfg);
+      setSuccess('Password updated successfully!');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || 'Failed to update password');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const renderSecurity = () => (
+    <div className="emp-security-card">
+      <h4 className="emp-card-title" style={{ fontFamily: 'Syne, sans-serif', fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '1.25rem' }}>Change Password</h4>
+      {error && <div className="emp-error-msg">{error}</div>}
+      {success && <div className="emp-success-msg">{success}</div>}
+      <form onSubmit={handleUpdatePassword} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '400px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+          <label style={{ fontSize: '0.7rem', fontWeight: 600, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Current Password</label>
+          <input
+            type="password"
+            placeholder="••••••••"
+            value={currentPassword}
+            onChange={e => setCurrentPassword(e.target.value)}
+            required
+            style={{
+              padding: '0.75rem',
+              background: 'rgba(255, 255, 255, 0.02)',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+              color: 'var(--text-main)',
+              outline: 'none',
+              transition: 'border-color .2s'
+            }}
+          />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+          <label style={{ fontSize: '0.7rem', fontWeight: 600, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>New Password</label>
+          <input
+            type="password"
+            placeholder="••••••••"
+            value={newPassword}
+            onChange={e => setNewPassword(e.target.value)}
+            required
+            minLength={6}
+            style={{
+              padding: '0.75rem',
+              background: 'rgba(255, 255, 255, 0.02)',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+              color: 'var(--text-main)',
+              outline: 'none',
+              transition: 'border-color .2s'
+            }}
+          />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+          <label style={{ fontSize: '0.7rem', fontWeight: 600, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Confirm New Password</label>
+          <input
+            type="password"
+            placeholder="••••••••"
+            value={confirmPassword}
+            onChange={e => setConfirmPassword(e.target.value)}
+            required
+            minLength={6}
+            style={{
+              padding: '0.75rem',
+              background: 'rgba(255, 255, 255, 0.02)',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+              color: 'var(--text-main)',
+              outline: 'none',
+              transition: 'border-color .2s'
+            }}
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={updating}
+          style={{
+            padding: '0.75rem',
+            background: 'linear-gradient(135deg,#6366f1,#8b5cf6)',
+            border: 'none',
+            borderRadius: '8px',
+            color: '#fff',
+            fontFamily: 'Syne, sans-serif',
+            fontSize: '.9rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+            marginTop: '0.5rem',
+            transition: 'opacity 0.2s',
+            boxShadow: '0 4px 12px rgba(99,102,241,.2)'
+          }}
+        >
+          {updating ? 'Updating...' : 'Update Password'}
+        </button>
+      </form>
+    </div>
+  );
+
   return (
     <>
       <style>{`
+        .emp-security-card {
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          padding: 1.5rem;
+          margin-top: 1rem;
+        }
+        .emp-error-msg {
+          padding: 0.75rem;
+          background: rgba(239, 68, 68, 0.08);
+          border: 1px solid rgba(239, 68, 68, 0.2);
+          border-radius: 8px;
+          color: #fca5a5;
+          font-size: 0.8rem;
+          margin-bottom: 1rem;
+        }
+        .emp-success-msg {
+          padding: 0.75rem;
+          background: rgba(16, 185, 129, 0.08);
+          border: 1px solid rgba(16, 185, 129, 0.2);
+          border-radius: 8px;
+          color: #a7f3d0;
+          font-size: 0.8rem;
+          margin-bottom: 1rem;
+        }
+
         .emp-workspace {
           background: var(--bg-card);
           border: 1px solid var(--border);
@@ -377,6 +524,12 @@ export const EmployeeWorkspace = () => {
             >
               My Files ({files.length})
             </button>
+            <button
+              className={`emp-sub-tab ${activeSubTab === 'security' ? 'active' : ''}`}
+              onClick={() => { setActiveSubTab('security'); setError(''); setSuccess(''); }}
+            >
+              🔑 Security
+            </button>
           </div>
         </div>
 
@@ -388,6 +541,7 @@ export const EmployeeWorkspace = () => {
             {activeSubTab === 'vehicles' && renderVehicles()}
             {activeSubTab === 'tickets' && renderTickets()}
             {activeSubTab === 'files' && renderFiles()}
+            {activeSubTab === 'security' && renderSecurity()}
           </div>
         )}
       </div>

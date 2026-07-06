@@ -570,11 +570,11 @@
 
 // export default Login;
 
-
 import { API_BASE_URL } from '../config';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import logoImg from '../../Assets/logo.png';
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 const STYLES = `
@@ -879,7 +879,7 @@ const Login = () => {
         {/* Logo */}
         <div className="lg-logo-section">
           <div className="lg-logo-wrap">
-            <img className="lg-logo-img" src="../Assets/logo.png" alt="Logo"
+            <img className="lg-logo-img" src={logoImg} alt="Logo"
               onError={e => { e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }} />
             <div className="lg-logo-fb">A</div>
           </div>
